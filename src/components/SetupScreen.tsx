@@ -126,12 +126,12 @@ export function SetupScreen({ initialColumns, initialName, onSave }: SetupScreen
                 </div>
                 <div className="setup-prices">
                   <PriceInput
-                    label="Rice Capital (Cost)"
+                    label="Rice Capital"
                     value={col.riceCost ?? 0}
                     onChange={(v) => updateCol(col.id, 'riceCost', v)}
                   />
                   <PriceInput
-                    label="Rice Price (Selling)"
+                    label="Rice Price"
                     value={col.basePrice}
                     onChange={(v) => updateCol(col.id, 'basePrice', v)}
                   />
