@@ -52,7 +52,7 @@ export function SetupScreen({ initialColumns, initialName, onSave }: SetupScreen
       ...c,
       name: c.name.trim() || 'Untitled',
     }))
-    onSave(name.trim() || getTodayDateString(), cleaned)
+    onSave(name.trim(), cleaned)
   }
 
   const handleNuke = () => {

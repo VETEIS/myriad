@@ -26,7 +26,7 @@ export default function App() {
     const saved = loadFromStorage()
     return (
       <SetupScreen
-        initialName={saved?.customerName ?? getTodayDateString()}
+        initialName={saved?.customerName ?? ''}
         initialColumns={saved?.columns ?? []}
         onSave={handleSaveSetup}
       />

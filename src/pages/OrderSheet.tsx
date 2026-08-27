@@ -30,10 +30,15 @@ export function OrderSheet({ onOpenSetup }: Props) {
   const addRow = useCallback(() => dispatch({ type: 'ADD_ROW' }), [])
 
   const handleCompleteOrder = () => {
+    if (!customerName.trim()) {
+      alert('Please enter a customer name before settling the order.')
+      return
+    }
     dispatch({ type: 'COMPLETE_ORDER' })
   }
 
   const { columns, rows, history, customerName } = state
+  const isNameEmpty = !customerName.trim()
 
   // Total amount for CURRENT customer ticket
   const colTotals = columns.map((col, ci) =>
@@ -158,7 +163,11 @@ export function OrderSheet({ onOpenSetup }: Props) {
 
       {/* Action Bar */}
       <div className="sheet-action-bar">
-        <button className="complete-order-btn" onClick={handleCompleteOrder}>
+        <button
+          className={`complete-order-btn ${isNameEmpty ? 'btn-disabled' : ''}`}
+          onClick={handleCompleteOrder}
+          disabled={isNameEmpty}
+        >
           Settle Order {currentTicketTotal > 0 ? `(${fmt(currentTicketTotal)})` : ''}
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <polyline points="20 6 9 17 4 12" />
