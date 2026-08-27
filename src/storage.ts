@@ -36,8 +36,8 @@ export function loadSavedMenuColumns(): ColumnConfig[] {
     // ignore
   }
   return [
-    createDefaultColumn('Spicy', 50, 5),
-    createDefaultColumn('Regular', 45, 5),
+    createDefaultColumn('', 0, 0),
+    createDefaultColumn('', 0, 0),
   ]
 }
 
