@@ -58,12 +58,15 @@ export function OrderSheet({ onOpenSetup }: Props) {
             </svg>
           </div>
           <div className="header-title-block">
-            <EditableTitle
-              value={customerName}
-              onChange={(name) => dispatch({ type: 'SET_CUSTOMER_NAME', customerName: name })}
-              placeholder="Customer Name"
-              className="sheet-name"
-            />
+            <div className="customer-input-wrap">
+              <EditableTitle
+                value={customerName}
+                onChange={(name) => dispatch({ type: 'SET_CUSTOMER_NAME', customerName: name })}
+                placeholder="Order for... (e.g. John)"
+                className="sheet-name"
+              />
+              <span className="sheet-date-subtitle">{getTodayDateString()}</span>
+            </div>
             {currentTicketTotal > 0 && (
               <span className="sheet-total-badge">{fmt(currentTicketTotal)}</span>
             )}

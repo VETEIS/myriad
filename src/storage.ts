@@ -53,7 +53,7 @@ export function createDefaultSheet(): SheetState {
   const columns = loadSavedMenuColumns()
   return {
     id: generateId(),
-    customerName: 'Customer #1',
+    customerName: '',
     columns,
     rows: Array.from({ length: 50 }, () => createDefaultRow(columns.length)),
     history: [],

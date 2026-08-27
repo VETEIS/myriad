@@ -83,7 +83,7 @@ export function sheetReducer(state: SheetState, action: SheetAction): SheetState
       return {
         ...state,
         id: generateId(),
-        customerName: `Customer #${nextCustomerIndex}`,
+        customerName: '',
         rows: freshRows,
         history: [completedRecord, ...state.history],
         updatedAt: now,
