@@ -13,17 +13,12 @@ export function OrderSheet() {
   })
 
   const [showReset, setShowReset] = useState(false)
-  const [totalRows, setTotalRows] = useState(state.rows.length)
 
   // debounced auto-save
   useEffect(() => {
     const t = setTimeout(() => saveToStorage(state), SAVE_DEBOUNCE_MS)
     return () => clearTimeout(t)
   }, [state])
-
-  useEffect(() => {
-    setTotalRows(state.rows.length)
-  }, [state.rows.length])
 
   const addRow = useCallback(() => dispatch({ type: 'ADD_ROW' }), [])
 
