@@ -70,7 +70,7 @@ export function OrderSheet() {
       <div className="sheet-container">
         {/* Column title row */}
         <div className="grid-row title-row">
-          <div className="row-number-cell" aria-hidden="true">#</div>
+          <div className="row-number-header" aria-hidden="true">#</div>
           <div className="title-cell">
             <EditableTitle
               value={state.columns[0]}
