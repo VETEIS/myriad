@@ -15,6 +15,16 @@ export function createDefaultRow(numCols: number): CellRow {
   return { id: generateId(), values: Array(numCols).fill(0) }
 }
 
+export function getTodayDateString(): string {
+  const options: Intl.DateTimeFormatOptions = {
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  }
+  return new Date().toLocaleDateString('en-US', options)
+}
+
 export function loadSavedMenuColumns(): ColumnConfig[] {
   try {
     const raw = localStorage.getItem(MENU_PRESET_KEY)

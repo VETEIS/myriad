@@ -18,7 +18,7 @@ export default function App() {
       ...row,
       values: Array(numCols).fill(0).map((_, i) => row.values[i] ?? 0),
     }))
-    saveToStorage({ ...current, name, columns, rows, updatedAt: Date.now() })
+    saveToStorage({ ...current, customerName: name, columns, rows, updatedAt: Date.now() })
     setScreen('sheet')
   }
 
@@ -26,7 +26,7 @@ export default function App() {
     const saved = loadFromStorage()
     return (
       <SetupScreen
-        initialName={saved?.name ?? getTodayDateString()}
+        initialName={saved?.customerName ?? getTodayDateString()}
         initialColumns={saved?.columns ?? []}
         onSave={handleSaveSetup}
       />
