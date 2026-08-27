@@ -1,31 +1,50 @@
-import { SheetState, CellRow } from './types'
+import { SheetState, ColumnConfig, CellRow } from './types'
 
-const STORAGE_KEY = 'myriad-order-tracker-v1'
+const STORAGE_KEY = 'myriad-order-tracker-v2'
 
 export function generateId(): string {
   return Math.random().toString(36).slice(2, 10)
 }
 
-export function createDefaultRow(): CellRow {
-  return { id: generateId(), values: [0, 0] }
+export function createDefaultColumn(name: string, basePrice = 0, pricePerCount = 0): ColumnConfig {
+  return { id: generateId(), name, basePrice, pricePerCount }
 }
 
-export function createDefaultSheet(name = 'New Sheet'): SheetState {
+export function createDefaultRow(numCols: number): CellRow {
+  return { id: generateId(), values: Array(numCols).fill(0) }
+}
+
+export function createDefaultSheet(): SheetState {
+  const columns = [
+    createDefaultColumn('Column A'),
+    createDefaultColumn('Column B'),
+  ]
   return {
     id: generateId(),
-    name,
-    columns: ['Column A', 'Column B'],
-    rows: Array.from({ length: 8 }, createDefaultRow),
+    name: 'New Sheet',
+    columns,
+    rows: Array.from({ length: 8 }, () => createDefaultRow(columns.length)),
     createdAt: Date.now(),
     updatedAt: Date.now(),
   }
+}
+
+// Compute total for one cell
+export function cellTotal(count: number, col: ColumnConfig): number {
+  if (count === 0) return 0
+  return col.basePrice + count * col.pricePerCount
+}
+
+// Compute total for one row
+export function rowTotal(values: number[], columns: ColumnConfig[]): number {
+  return values.reduce((sum, count, i) => sum + cellTotal(count, columns[i]), 0)
 }
 
 export function saveToStorage(state: SheetState): void {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state))
   } catch {
-    // storage full or unavailable — silently fail
+    // storage full or unavailable
   }
 }
 
@@ -34,14 +53,9 @@ export function loadFromStorage(): SheetState | null {
     const raw = localStorage.getItem(STORAGE_KEY)
     if (!raw) return null
     const parsed = JSON.parse(raw) as SheetState
-    // basic validation
-    if (!parsed.id || !parsed.columns || !Array.isArray(parsed.rows)) return null
+    if (!parsed.id || !Array.isArray(parsed.columns) || !Array.isArray(parsed.rows)) return null
     return parsed
   } catch {
     return null
   }
-}
-
-export function clearStorage(): void {
-  localStorage.removeItem(STORAGE_KEY)
 }

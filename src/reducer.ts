@@ -1,26 +1,31 @@
-import { SheetState, SheetAction, CellRow } from './types'
+import { SheetState, SheetAction, ColumnConfig } from './types'
 import { generateId, createDefaultRow } from './storage'
 
 export function sheetReducer(state: SheetState, action: SheetAction): SheetState {
   const now = Date.now()
+
   switch (action.type) {
     case 'LOAD':
       return action.state
 
-    case 'RENAME_SHEET':
-      return { ...state, name: action.name, updatedAt: now }
-
-    case 'SET_COLUMN_TITLE': {
-      const columns = [...state.columns] as [string, string]
-      columns[action.col] = action.value
-      return { ...state, columns, updatedAt: now }
+    case 'APPLY_SETUP': {
+      // Update column configs; pad/trim row values to match new column count
+      const newCols: ColumnConfig[] = action.columns
+      const numCols = newCols.length
+      const rows = state.rows.map((row) => {
+        const values = Array(numCols)
+          .fill(0)
+          .map((_, i) => row.values[i] ?? 0)
+        return { ...row, values }
+      })
+      return { ...state, name: action.name, columns: newCols, rows, updatedAt: now }
     }
 
     case 'INCREMENT': {
       const rows = state.rows.map((row) => {
         if (row.id !== action.rowId) return row
-        const values = [...row.values] as [number, number]
-        values[action.col] = values[action.col] + 1
+        const values = [...row.values]
+        values[action.colIndex] = (values[action.colIndex] ?? 0) + 1
         return { ...row, values }
       })
       return { ...state, rows, updatedAt: now }
@@ -29,28 +34,26 @@ export function sheetReducer(state: SheetState, action: SheetAction): SheetState
     case 'DECREMENT': {
       const rows = state.rows.map((row) => {
         if (row.id !== action.rowId) return row
-        const values = [...row.values] as [number, number]
-        values[action.col] = Math.max(0, values[action.col] - 1)
+        const values = [...row.values]
+        values[action.colIndex] = Math.max(0, (values[action.colIndex] ?? 0) - 1)
         return { ...row, values }
       })
       return { ...state, rows, updatedAt: now }
     }
 
     case 'ADD_ROW': {
-      const newRow: CellRow = createDefaultRow()
-      return { ...state, rows: [...state.rows, newRow], updatedAt: now }
-    }
-
-    case 'DELETE_ROW': {
-      const rows = state.rows.filter((r) => r.id !== action.rowId)
-      return { ...state, rows, updatedAt: now }
+      return {
+        ...state,
+        rows: [...state.rows, createDefaultRow(state.columns.length)],
+        updatedAt: now,
+      }
     }
 
     case 'RESET_ALL': {
       const rows = state.rows.map((row) => ({
         ...row,
         id: generateId(),
-        values: [0, 0] as [number, number],
+        values: Array(state.columns.length).fill(0),
       }))
       return { ...state, rows, updatedAt: now }
     }
