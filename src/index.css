@@ -623,14 +623,16 @@ body {
 
 
 /* ════════════════════════════════════════
-   ORDER SHEET
+   ORDER SHEET (Viewport Fixed 100vh Layout)
 ════════════════════════════════════════ */
 .sheet-wrapper {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
-  padding-bottom: 32px;
+  height: 100vh;
+  height: 100dvh; /* dynamic viewport height for mobile browsers */
+  overflow: hidden;
   background: var(--bg-base);
+  padding-bottom: 12px;
 }
 
 .app-header {
@@ -644,6 +646,7 @@ body {
   background: #ffffff;
   border-bottom: 1px solid var(--border);
   box-shadow: var(--shadow-sm);
+  flex-shrink: 0;
 }
 
 .header-left {
@@ -725,6 +728,7 @@ body {
   padding: 10px 14px 6px;
   gap: 0;
   background: var(--bg-base);
+  flex-shrink: 0;
 }
 
 .col-label-num {
@@ -771,9 +775,10 @@ body {
   align-self: center;
 }
 
-/* ── Sheet container ── */
+/* ── Sheet container (Fixed height, flex column) ── */
 .sheet-container {
   flex: 1;
+  min-height: 0; /* CRITICAL for flex child scrolling */
   display: flex;
   flex-direction: column;
   margin: 0 14px;
@@ -784,7 +789,12 @@ body {
   box-shadow: var(--shadow-sheet);
 }
 
-.rows-container { flex: 1; }
+/* Internal rows scrolling */
+.rows-container {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
 
 /* ── Grid rows ── */
 .grid-row {
@@ -886,6 +896,7 @@ body {
   background: var(--accent);
   border-top: 2px solid var(--accent-hover) !important;
   height: 56px;
+  flex-shrink: 0;
 }
 
 .summary-num {
