@@ -1,6 +1,6 @@
 import { useReducer, useEffect, useCallback, useState, useRef } from 'react'
 import { sheetReducer } from '../reducer'
-import { loadFromStorage, saveToStorage, createDefaultSheet, cellTotal, rowTotal, getTodayDateString } from '../storage'
+import { loadFromStorage, saveToStorage, createDefaultSheet, cellTotal, rowTotal, rowCost, getTodayDateString } from '../storage'
 import { CountCell } from '../components/CountCell'
 import { EditableTitle } from '../components/EditableTitle'
 import { CompletedOrder } from '../types'
@@ -69,8 +69,13 @@ export function OrderSheet({ onOpenSetup }: Props) {
     return getOrderDateKey(item.completedAt) === selectedDateFilter
   })
 
-  // Total sales for the currently selected filter
+  // Total sales & capital cost for the currently selected filter
   const filteredTotalRevenue = filteredHistory.reduce((sum, item) => sum + item.totalAmount, 0)
+  const filteredTotalCost = filteredHistory.reduce((sum, item) => {
+    if (item.totalCost !== undefined) return sum + item.totalCost
+    return sum + item.rows.reduce((rSum, r) => rSum + rowCost(r.values, item.columns), 0)
+  }, 0)
+  const filteredNetProfit = filteredTotalRevenue - filteredTotalCost
 
   // Count of active orders per column
   const colOrderCounts = columns.map((_, ci) =>
@@ -217,8 +222,9 @@ export function OrderSheet({ onOpenSetup }: Props) {
               <div>
                 <h2 className="modal-title">Completed Orders</h2>
                 <p className="history-revenue-subtitle">
-                  {selectedDateFilter === 'ALL' ? 'Total Sales: ' : `Sales for ${selectedDateFilter}: `}
-                  <strong className="revenue-highlight">{fmt(filteredTotalRevenue)}</strong> ({filteredHistory.length} orders)
+                  Sales: <strong className="revenue-highlight">{fmt(filteredTotalRevenue)}</strong>
+                  <span className="dot-divider"> · </span>
+                  Profit: <strong className="profit-highlight">+{fmt(filteredNetProfit)}</strong>
                 </p>
               </div>
               <div className="history-header-actions">
@@ -264,24 +270,31 @@ export function OrderSheet({ onOpenSetup }: Props) {
                   .sort((a, b) =>
                     sortOrder === 'newest' ? b.completedAt - a.completedAt : a.completedAt - b.completedAt,
                   )
-                  .map((order) => (
-                    <div
-                      key={order.id}
-                      className="history-item-card"
-                      onClick={() => setSelectedHistoryOrder(order)}
-                    >
-                      <div className="history-item-left">
-                        <span className="history-customer-name">{order.customerName}</span>
-                        <span className="history-time">{fmtDateTime(order.completedAt)}</span>
+                  .map((order) => {
+                    const orderCostVal = order.totalCost ?? order.rows.reduce((s, r) => s + rowCost(r.values, order.columns), 0)
+                    const orderProfit = order.totalAmount - orderCostVal
+                    return (
+                      <div
+                        key={order.id}
+                        className="history-item-card"
+                        onClick={() => setSelectedHistoryOrder(order)}
+                      >
+                        <div className="history-item-left">
+                          <span className="history-customer-name">{order.customerName}</span>
+                          <span className="history-time">{fmtDateTime(order.completedAt)}</span>
+                        </div>
+                        <div className="history-item-right">
+                          <div className="history-amounts-block">
+                            <span className="history-amount">{fmt(order.totalAmount)}</span>
+                            <span className="history-profit">Profit +{fmt(orderProfit)}</span>
+                          </div>
+                          <svg className="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <polyline points="9 18 15 12 9 6" />
+                          </svg>
+                        </div>
                       </div>
-                      <div className="history-item-right">
-                        <span className="history-amount">{fmt(order.totalAmount)}</span>
-                        <svg className="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <polyline points="9 18 15 12 9 6" />
-                        </svg>
-                      </div>
-                    </div>
-                  ))
+                    )
+                  })
               )}
             </div>
           </div>
@@ -323,8 +336,18 @@ export function OrderSheet({ onOpenSetup }: Props) {
             </div>
 
             <div className="receipt-total-bar">
-              <span>Total Paid:</span>
-              <strong className="receipt-total-amount">{fmt(selectedHistoryOrder.totalAmount)}</strong>
+              <div className="receipt-calc-line">
+                <span>Total Revenue:</span>
+                <strong>{fmt(selectedHistoryOrder.totalAmount)}</strong>
+              </div>
+              <div className="receipt-calc-line">
+                <span>Capital Cost:</span>
+                <span className="text-muted-cost">-{fmt(selectedHistoryOrder.totalCost ?? selectedHistoryOrder.rows.reduce((s, r) => s + rowCost(r.values, selectedHistoryOrder.columns), 0))}</span>
+              </div>
+              <div className="receipt-calc-line profit-line">
+                <span>Net Profit:</span>
+                <strong className="receipt-profit-amount">+{fmt(selectedHistoryOrder.totalAmount - (selectedHistoryOrder.totalCost ?? selectedHistoryOrder.rows.reduce((s, r) => s + rowCost(r.values, selectedHistoryOrder.columns), 0)))}</strong>
+              </div>
             </div>
 
             <div className="modal-actions">

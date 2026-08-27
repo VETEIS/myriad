@@ -1,8 +1,10 @@
 export interface ColumnConfig {
   id: string
   name: string
-  basePrice: number      // rice price
-  pricePerCount: number  // siomai per pc price
+  basePrice: number       // rice selling price
+  pricePerCount: number   // siomai selling price per pc
+  riceCost?: number       // rice capital cost
+  siomaiCostPerPc?: number // siomai capital cost per pc
 }
 
 export interface CellRow {
@@ -22,6 +24,7 @@ export interface CompletedOrder {
   columns: ColumnConfig[]
   rows: CellRow[]
   totalAmount: number
+  totalCost?: number      // total capital cost for this order
   completedAt: number
 }
 

@@ -1,5 +1,5 @@
 import { SheetState, SheetAction, ColumnConfig, CompletedOrder } from './types'
-import { generateId, createDefaultRow, rowTotal } from './storage'
+import { generateId, createDefaultRow, rowTotal, rowCost } from './storage'
 
 export function sheetReducer(state: SheetState, action: SheetAction): SheetState {
   const now = Date.now()
@@ -67,6 +67,11 @@ export function sheetReducer(state: SheetState, action: SheetAction): SheetState
         0,
       )
 
+      const orderCost = state.rows.reduce(
+        (sum, row) => sum + rowCost(row.values, state.columns),
+        0,
+      )
+
       // Only archive if there is non-zero order data or explicit customer
       const completedRecord: CompletedOrder = {
         id: generateId(),
@@ -74,6 +79,7 @@ export function sheetReducer(state: SheetState, action: SheetAction): SheetState
         columns: [...state.columns],
         rows: state.rows.map((r) => ({ ...r, values: [...r.values] })),
         totalAmount: orderTotal,
+        totalCost: orderCost,
         completedAt: now,
       }
 

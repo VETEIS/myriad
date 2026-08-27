@@ -72,9 +72,23 @@ export function cellTotal(count: number, col: ColumnConfig): number {
   return col.basePrice + siomaiPcs * col.pricePerCount
 }
 
-// Compute total for one row
+// Compute capital cost for one cell
+export function cellCost(count: number, col: ColumnConfig): number {
+  if (count <= 0) return 0
+  const siomaiPcs = count - 1
+  const riceCost = col.riceCost ?? 0
+  const siomaiCost = col.siomaiCostPerPc ?? 0
+  return riceCost + siomaiPcs * siomaiCost
+}
+
+// Compute total revenue for one row
 export function rowTotal(values: number[], columns: ColumnConfig[]): number {
   return values.reduce((sum, count, i) => sum + cellTotal(count, columns[i] ?? { basePrice: 0, pricePerCount: 0 }), 0)
+}
+
+// Compute total capital cost for one row
+export function rowCost(values: number[], columns: ColumnConfig[]): number {
+  return values.reduce((sum, count, i) => sum + cellCost(count, columns[i] ?? { basePrice: 0, pricePerCount: 0 }), 0)
 }
 
 export function saveToStorage(state: SheetState): void {
