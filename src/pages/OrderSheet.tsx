@@ -200,8 +200,6 @@ export function OrderSheet({ onOpenSetup }: Props) {
         </button>
       </div>
 
-      <p className="hint-text">Tap = +1 siomai · Long-press = remove · Cells unlock sequentially</p>
-
       {/* HISTORY MODAL */}
       {showHistoryModal && (
         <div className="modal-overlay" onClick={() => setShowHistoryModal(false)}>
