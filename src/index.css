@@ -259,8 +259,8 @@
 }
 
 .receipt-table-header {
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  align-items: center;
   font-size: 11px;
   font-weight: 800;
   color: var(--text-muted);
@@ -270,18 +270,21 @@
   border-bottom: 1px solid var(--border);
 }
 
+.receipt-col-num { text-align: left; }
+.receipt-col-name { text-align: left; }
+.receipt-col-total { text-align: right; }
+
 .receipt-row {
-  display: flex;
-  justify-content: space-between;
+  display: grid;
   align-items: center;
   padding: 8px 4px;
   font-size: 14px;
   border-bottom: 1px dashed var(--border);
 }
 
-.receipt-row-num { font-weight: 700; color: var(--text-muted); width: 24px; }
-.receipt-val { flex: 1; text-align: center; font-weight: 600; color: var(--text-primary); }
-.receipt-total { font-weight: 700; color: var(--text-primary); width: 60px; text-align: right; }
+.receipt-row-num { font-weight: 700; color: var(--text-muted); text-align: left; }
+.receipt-val { font-weight: 600; color: var(--text-primary); text-align: left; }
+.receipt-total { font-weight: 700; color: var(--text-primary); text-align: right; }
 
 .receipt-total-bar {
   display: flex;

@@ -19,6 +19,7 @@ export default function App() {
       values: Array(numCols).fill(0).map((_, i) => row.values[i] ?? 0),
     }))
     saveToStorage({ ...current, columns, rows, updatedAt: Date.now() })
+    window.scrollTo(0, 0)
     setScreen('sheet')
   }
 

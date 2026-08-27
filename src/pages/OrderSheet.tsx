@@ -1,4 +1,4 @@
-import { useReducer, useEffect, useCallback, useState } from 'react'
+import { useReducer, useEffect, useCallback, useState, useRef } from 'react'
 import { sheetReducer } from '../reducer'
 import { loadFromStorage, saveToStorage, createDefaultSheet, cellTotal, rowTotal, getTodayDateString } from '../storage'
 import { CountCell } from '../components/CountCell'
@@ -27,6 +27,15 @@ export function OrderSheet({ onOpenSetup }: Props) {
   const [selectedHistoryOrder, setSelectedHistoryOrder] = useState<CompletedOrder | null>(null)
   const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest')
   const [selectedDateFilter, setSelectedDateFilter] = useState<string>('ALL')
+
+  const rowsContainerRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    // Reset scroll position to top when order sheet opens or state changes
+    if (rowsContainerRef.current) {
+      rowsContainerRef.current.scrollTop = 0
+    }
+  }, [state.id])
 
   useEffect(() => {
     const t = setTimeout(() => saveToStorage(state), SAVE_DEBOUNCE_MS)
@@ -150,7 +159,7 @@ export function OrderSheet({ onOpenSetup }: Props) {
           </div>
 
           {/* 50 Rows Container */}
-          <div className="rows-container">
+          <div className="rows-container" ref={rowsContainerRef}>
             {rows.map((row, idx) => {
               const total = rowTotal(row.values, columns)
               return (
@@ -289,18 +298,18 @@ export function OrderSheet({ onOpenSetup }: Props) {
             </div>
 
             <div className="receipt-body">
-              <div className="receipt-table-header">
-                <span>Row</span>
+              <div className="receipt-table-header" style={{ gridTemplateColumns: `36px repeat(${selectedHistoryOrder.columns.length}, 1fr) 70px` }}>
+                <span className="receipt-col-num">#</span>
                 {selectedHistoryOrder.columns.map((c) => (
-                  <span key={c.id}>{c.name}</span>
+                  <span key={c.id} className="receipt-col-name">{c.name}</span>
                 ))}
-                <span>Total</span>
+                <span className="receipt-col-total">Total</span>
               </div>
               {selectedHistoryOrder.rows.map((row, i) => {
                 const rTotal = rowTotal(row.values, selectedHistoryOrder.columns)
                 if (rTotal === 0 && row.values.every((v) => v === 0)) return null
                 return (
-                  <div key={row.id} className="receipt-row">
+                  <div key={row.id} className="receipt-row" style={{ gridTemplateColumns: `36px repeat(${selectedHistoryOrder.columns.length}, 1fr) 70px` }}>
                     <span className="receipt-row-num">{i + 1}</span>
                     {selectedHistoryOrder.columns.map((col, ci) => (
                       <span key={col.id} className="receipt-val">
