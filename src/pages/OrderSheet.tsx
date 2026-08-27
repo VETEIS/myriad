@@ -25,6 +25,8 @@ export function OrderSheet({ onOpenSetup }: Props) {
 
   const [showHistoryModal, setShowHistoryModal] = useState(false)
   const [selectedHistoryOrder, setSelectedHistoryOrder] = useState<CompletedOrder | null>(null)
+  const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest')
+  const [selectedDateFilter, setSelectedDateFilter] = useState<string>('ALL')
 
   useEffect(() => {
     const t = setTimeout(() => saveToStorage(state), SAVE_DEBOUNCE_MS)
@@ -43,6 +45,23 @@ export function OrderSheet({ onOpenSetup }: Props) {
 
   const { columns, rows, history, customerName } = state
   const isNameEmpty = !customerName.trim()
+
+  // Extract unique formatted date strings from history for accounting filter
+  const getOrderDateKey = (ts: number) =>
+    new Date(ts).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+
+  const uniqueDates = Array.from(
+    new Set(history.map((item) => getOrderDateKey(item.completedAt))),
+  )
+
+  // Filter history by selected date
+  const filteredHistory = history.filter((item) => {
+    if (selectedDateFilter === 'ALL') return true
+    return getOrderDateKey(item.completedAt) === selectedDateFilter
+  })
+
+  // Total sales for the currently selected filter
+  const filteredTotalRevenue = filteredHistory.reduce((sum, item) => sum + item.totalAmount, 0)
 
   // Count of active orders per column
   const colOrderCounts = columns.map((_, ci) =>
@@ -188,37 +207,71 @@ export function OrderSheet({ onOpenSetup }: Props) {
               <div>
                 <h2 className="modal-title">Completed Orders</h2>
                 <p className="history-revenue-subtitle">
-                  Total Sales: <strong className="revenue-highlight">{fmt(todayTotalRevenue)}</strong> ({history.length} settled orders)
+                  {selectedDateFilter === 'ALL' ? 'Total Sales: ' : `Sales for ${selectedDateFilter}: `}
+                  <strong className="revenue-highlight">{fmt(filteredTotalRevenue)}</strong> ({filteredHistory.length} orders)
                 </p>
               </div>
-              <button className="modal-close-btn" onClick={() => setShowHistoryModal(false)}>✕</button>
+              <div className="history-header-actions">
+                {history.length > 1 && (
+                  <button
+                    className="history-sort-btn"
+                    onClick={() => setSortOrder((s) => (s === 'newest' ? 'oldest' : 'newest'))}
+                  >
+                    {sortOrder === 'newest' ? '↓ Newest' : '↑ Oldest'}
+                  </button>
+                )}
+                <button className="modal-close-btn" onClick={() => setShowHistoryModal(false)}>✕</button>
+              </div>
             </div>
 
+            {/* Date Selector Filter Bar */}
+            {uniqueDates.length > 0 && (
+              <div className="history-date-filter-bar">
+                <span className="filter-label">Filter Date:</span>
+                <select
+                  className="history-date-select"
+                  value={selectedDateFilter}
+                  onChange={(e) => setSelectedDateFilter(e.target.value)}
+                >
+                  <option value="ALL">All Dates ({history.length})</option>
+                  {uniqueDates.map((dateStr) => (
+                    <option key={dateStr} value={dateStr}>
+                      {dateStr}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+
             <div className="history-list">
-              {history.length === 0 ? (
+              {filteredHistory.length === 0 ? (
                 <div className="history-empty">
-                  <p>No settled orders yet today.</p>
-                  <span className="history-empty-hint">Settle customer orders to log them here.</span>
+                  <p>No settled orders for this date.</p>
+                  <span className="history-empty-hint">Select another date or settle orders.</span>
                 </div>
               ) : (
-                history.map((order) => (
-                  <div
-                    key={order.id}
-                    className="history-item-card"
-                    onClick={() => setSelectedHistoryOrder(order)}
-                  >
-                    <div className="history-item-left">
-                      <span className="history-customer-name">{order.customerName}</span>
-                      <span className="history-time">{fmtDateTime(order.completedAt)}</span>
+                [...filteredHistory]
+                  .sort((a, b) =>
+                    sortOrder === 'newest' ? b.completedAt - a.completedAt : a.completedAt - b.completedAt,
+                  )
+                  .map((order) => (
+                    <div
+                      key={order.id}
+                      className="history-item-card"
+                      onClick={() => setSelectedHistoryOrder(order)}
+                    >
+                      <div className="history-item-left">
+                        <span className="history-customer-name">{order.customerName}</span>
+                        <span className="history-time">{fmtDateTime(order.completedAt)}</span>
+                      </div>
+                      <div className="history-item-right">
+                        <span className="history-amount">{fmt(order.totalAmount)}</span>
+                        <svg className="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <polyline points="9 18 15 12 9 6" />
+                        </svg>
+                      </div>
                     </div>
-                    <div className="history-item-right">
-                      <span className="history-amount">{fmt(order.totalAmount)}</span>
-                      <svg className="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <polyline points="9 18 15 12 9 6" />
-                      </svg>
-                    </div>
-                  </div>
-                ))
+                  ))
               )}
             </div>
           </div>
@@ -265,19 +318,8 @@ export function OrderSheet({ onOpenSetup }: Props) {
             </div>
 
             <div className="modal-actions">
-              <button
-                className="btn btn-ghost text-danger"
-                onClick={() => {
-                  if (window.confirm('Delete this order entry?')) {
-                    dispatch({ type: 'DELETE_HISTORY_ITEM', orderId: selectedHistoryOrder.id })
-                    setSelectedHistoryOrder(null)
-                  }
-                }}
-              >
-                Delete Entry
-              </button>
-              <button className="btn btn-ghost" onClick={() => setSelectedHistoryOrder(null)}>
-                Close
+              <button className="btn btn-ghost" style={{ flex: 1 }} onClick={() => setSelectedHistoryOrder(null)}>
+                Close Receipt
               </button>
             </div>
           </div>
