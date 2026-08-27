@@ -1,7 +1,6 @@
 import { useReducer, useEffect, useCallback, useState } from 'react'
 import { sheetReducer } from '../reducer'
 import { loadFromStorage, saveToStorage, createDefaultSheet } from '../storage'
-import { SheetState } from '../types'
 import { EditableTitle } from '../components/EditableTitle'
 import { CountCell } from '../components/CountCell'
 
