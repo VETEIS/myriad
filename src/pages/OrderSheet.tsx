@@ -262,7 +262,7 @@ export function OrderSheet({ onOpenSetup }: Props) {
                     <span className="receipt-row-num">{i + 1}</span>
                     {selectedHistoryOrder.columns.map((col, ci) => (
                       <span key={col.id} className="receipt-val">
-                        {row.values[ci] > 0 ? `${row.values[ci]} pcs` : '—'}
+                        {row.values[ci] > 0 ? `${row.values[ci] - 1} pcs` : '—'}
                       </span>
                     ))}
                     <span className="receipt-total">{fmt(rTotal)}</span>

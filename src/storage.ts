@@ -63,9 +63,13 @@ export function createDefaultSheet(): SheetState {
 }
 
 // Compute total for one cell
+// count = 0: inactive (₱0)
+// count = 1: plain fried rice with 0 siomai pcs (basePrice)
+// count >= 2: fried rice with (count - 1) siomai pcs (basePrice + (count - 1) * pricePerCount)
 export function cellTotal(count: number, col: ColumnConfig): number {
-  if (count === 0) return 0
-  return col.basePrice + count * col.pricePerCount
+  if (count <= 0) return 0
+  const siomaiPcs = count - 1
+  return col.basePrice + siomaiPcs * col.pricePerCount
 }
 
 // Compute total for one row

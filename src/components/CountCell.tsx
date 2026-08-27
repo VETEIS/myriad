@@ -27,17 +27,19 @@ export function CountCell({ value, disabled = false, onIncrement, onDecrement }:
 
   const pressHandlers = useLongPress({ onTap: handleTap, onLongPress: handleLongPress })
 
+  const siomaiPcs = value > 0 ? value - 1 : 0
+
   return (
     <div
       className={`count-cell ${flash === 'up' ? 'flash-up' : ''} ${flash === 'down' ? 'flash-down' : ''} ${value > 0 ? 'has-value' : ''} ${disabled ? 'is-disabled' : ''}`}
       {...pressHandlers}
       role="button"
       aria-disabled={disabled}
-      aria-label={`${value} siomai pieces.`}
+      aria-label={`${siomaiPcs} siomai pieces.`}
     >
       {value > 0 ? (
         <div className="count-with-unit">
-          <span className="count-value">{value}</span>
+          <span className="count-value">{siomaiPcs}</span>
           <span className="count-unit">pcs</span>
         </div>
       ) : (
