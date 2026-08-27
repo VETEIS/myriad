@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { ColumnConfig } from '../types'
-import { generateId } from '../storage'
+import { generateId, getTodayDateString } from '../storage'
 
 interface SetupScreenProps {
   initialColumns: ColumnConfig[]
@@ -57,7 +57,7 @@ export function SetupScreen({ initialColumns, initialName, onSave }: SetupScreen
       ...c,
       name: c.name.trim() || 'Untitled',
     }))
-    onSave(name.trim() || 'New Sheet', cleaned)
+    onSave(name.trim() || getTodayDateString(), cleaned)
   }
 
   const handleNuke = () => {

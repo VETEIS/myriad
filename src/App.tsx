@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { OrderSheet } from './pages/OrderSheet'
 import { SetupScreen } from './components/SetupScreen'
-import { loadFromStorage, saveToStorage, createDefaultSheet } from './storage'
+import { loadFromStorage, saveToStorage, createDefaultSheet, getTodayDateString } from './storage'
 import { ColumnConfig } from './types'
 
 type Screen = 'setup' | 'sheet'
@@ -25,7 +25,7 @@ export default function App() {
     const saved = loadFromStorage()
     return (
       <SetupScreen
-        initialName={saved?.name ?? 'New Sheet'}
+        initialName={saved?.name ?? getTodayDateString()}
         initialColumns={saved?.columns ?? []}
         onSave={handleSaveSetup}
       />

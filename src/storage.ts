@@ -14,14 +14,24 @@ export function createDefaultRow(numCols: number): CellRow {
   return { id: generateId(), values: Array(numCols).fill(0) }
 }
 
+export function getTodayDateString(): string {
+  const options: Intl.DateTimeFormatOptions = {
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  }
+  return new Date().toLocaleDateString('en-US', options) // e.g. "Thu, Aug 27, 2026"
+}
+
 export function createDefaultSheet(): SheetState {
   const columns = [
-    createDefaultColumn('Column A'),
-    createDefaultColumn('Column B'),
+    createDefaultColumn('Spicy'),
+    createDefaultColumn('Regular'),
   ]
   return {
     id: generateId(),
-    name: 'New Sheet',
+    name: getTodayDateString(),
     columns,
     rows: Array.from({ length: 8 }, () => createDefaultRow(columns.length)),
     createdAt: Date.now(),
