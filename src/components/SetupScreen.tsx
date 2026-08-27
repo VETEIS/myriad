@@ -81,7 +81,7 @@ export function SetupScreen({ initialColumns, initialName, onSave }: SetupScreen
         </div>
         <div>
           <h1 className="setup-title">Sheet Setup</h1>
-          <p className="setup-subtitle">Configure your order columns and pricing</p>
+          <p className="setup-subtitle">Set your menu variants and pricing</p>
         </div>
       </div>
 
@@ -99,37 +99,37 @@ export function SetupScreen({ initialColumns, initialName, onSave }: SetupScreen
 
         {/* Column cards */}
         <div className="setup-section">
-          <label className="setup-section-label">Columns</label>
+          <label className="setup-section-label">Menu Variants</label>
           <div className="setup-cols">
             {cols.map((col, i) => (
               <div className="setup-col-card" key={col.id}>
                 <div className="setup-col-header">
-                  <span className="setup-col-badge">Column {i + 1}</span>
+                  <span className="setup-col-badge">Variant {i + 1}</span>
                 </div>
                 <div className="setup-field">
-                  <label className="setup-field-label">Item Name</label>
+                  <label className="setup-field-label">Variant Name</label>
                   <input
                     className="setup-text-input"
                     value={col.name}
-                    placeholder={i === 0 ? 'e.g. Spicy Fried Rice' : 'e.g. Regular Fried Rice'}
+                    placeholder={i === 0 ? 'e.g. Spicy' : 'e.g. Regular'}
                     onChange={(e) => updateCol(col.id, 'name', e.target.value)}
                   />
                 </div>
                 <div className="setup-prices">
                   <PriceInput
-                    label="Base Price"
+                    label="Rice Price"
                     value={col.basePrice}
                     onChange={(v) => updateCol(col.id, 'basePrice', v)}
                   />
                   <PriceInput
-                    label="Per Count"
+                    label="Per Siomai"
                     value={col.pricePerCount}
                     onChange={(v) => updateCol(col.id, 'pricePerCount', v)}
                   />
                 </div>
                 <p className="setup-formula-hint">
                   {col.basePrice > 0 || col.pricePerCount > 0
-                    ? `e.g. 3 taps = ₱${col.basePrice + 3 * col.pricePerCount}`
+                    ? `e.g. 3 pcs siomai = ₱${col.basePrice + 3 * col.pricePerCount} total`
                     : 'Set prices above to preview'}
                 </p>
               </div>

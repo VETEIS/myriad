@@ -80,9 +80,9 @@ export function OrderSheet({ onOpenSetup }: Props) {
             <span className="col-label-name">{col.name}</span>
             {(col.basePrice > 0 || col.pricePerCount > 0) && (
               <span className="col-label-price">
-                {col.basePrice > 0 ? `₱${col.basePrice}` : ''}
-                {col.basePrice > 0 && col.pricePerCount > 0 ? ' + ' : ''}
-                {col.pricePerCount > 0 ? `₱${col.pricePerCount}/ea` : ''}
+                {col.basePrice > 0 ? `Rice ₱${col.basePrice}` : ''}
+                {col.basePrice > 0 && col.pricePerCount > 0 ? ' · ' : ''}
+                {col.pricePerCount > 0 ? `Siomai ₱${col.pricePerCount}/pc` : ''}
               </span>
             )}
           </div>
@@ -135,7 +135,7 @@ export function OrderSheet({ onOpenSetup }: Props) {
         Add Row
       </button>
 
-      <p className="hint-text">Tap to count · Long-press to subtract · ⚙ to edit setup</p>
+      <p className="hint-text">Tap = +1 siomai · Long-press = remove · Each row is one order</p>
 
       {/* Reset modal */}
       {showReset && (

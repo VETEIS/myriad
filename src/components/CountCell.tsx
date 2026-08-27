@@ -29,9 +29,16 @@ export function CountCell({ value, onIncrement, onDecrement }: CountCellProps) {
       className={`count-cell ${flash === 'up' ? 'flash-up' : ''} ${flash === 'down' ? 'flash-down' : ''} ${value > 0 ? 'has-value' : ''}`}
       {...pressHandlers}
       role="button"
-      aria-label={`Count: ${value}. Tap to add, long-press to subtract.`}
+      aria-label={`${value} siomai pieces. Tap to add, long-press to subtract.`}
     >
-      <span className="count-value">{value > 0 ? value : <span className="count-empty">—</span>}</span>
+      {value > 0 ? (
+        <div className="count-with-unit">
+          <span className="count-value">{value}</span>
+          <span className="count-unit">pcs</span>
+        </div>
+      ) : (
+        <span className="count-value"><span className="count-empty">—</span></span>
+      )}
     </div>
   )
 }

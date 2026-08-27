@@ -1,6 +1,24 @@
 /* ── Google Fonts ── */
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap');
 
+/* ── Count cell unit display ── */
+.count-with-unit {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+}
+
+.count-unit {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-accent);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  opacity: 0.75;
+}
+
+
 /* ── Dev section ── */
 .dev-section { margin-top: 4px; }
 
