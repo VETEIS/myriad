@@ -7,8 +7,12 @@ import { CompletedOrder } from '../types'
 
 const SAVE_DEBOUNCE_MS = 600
 const fmt = (n: number) => `₱${n.toLocaleString()}`
-const fmtTime = (ts: number) =>
-  new Date(ts).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
+const fmtDateTime = (ts: number) => {
+  const d = new Date(ts)
+  const dateStr = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+  const timeStr = d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
+  return `${dateStr}, ${timeStr}`
+}
 
 interface Props {
   onOpenSetup: () => void
@@ -39,6 +43,11 @@ export function OrderSheet({ onOpenSetup }: Props) {
 
   const { columns, rows, history, customerName } = state
   const isNameEmpty = !customerName.trim()
+
+  // Count of active orders per column
+  const colOrderCounts = columns.map((_, ci) =>
+    rows.filter((row) => (row.values[ci] ?? 0) > 0).length,
+  )
 
   // Total amount for CURRENT customer ticket
   const colTotals = columns.map((col, ci) =>
@@ -72,9 +81,6 @@ export function OrderSheet({ onOpenSetup }: Props) {
               />
               <span className="sheet-date-subtitle">{getTodayDateString()}</span>
             </div>
-            {currentTicketTotal > 0 && (
-              <span className="sheet-total-badge">{fmt(currentTicketTotal)}</span>
-            )}
           </div>
         </div>
 
@@ -152,9 +158,9 @@ export function OrderSheet({ onOpenSetup }: Props) {
         {/* Current Customer Summary Row */}
         <div className="grid-row summary-row" style={{ gridTemplateColumns: `44px repeat(${columns.length}, 1fr) 76px` }}>
           <div className="summary-num">Σ</div>
-          {colTotals.map((total, ci) => (
+          {colOrderCounts.map((count, ci) => (
             <div className="summary-col-cell" key={ci}>
-              {total > 0 ? fmt(total) : '—'}
+              {count > 0 ? `${count} ${count === 1 ? 'order' : 'orders'}` : '—'}
             </div>
           ))}
           <div className="summary-grand">{currentTicketTotal > 0 ? fmt(currentTicketTotal) : '—'}</div>
@@ -169,9 +175,6 @@ export function OrderSheet({ onOpenSetup }: Props) {
           disabled={isNameEmpty}
         >
           Settle Order {currentTicketTotal > 0 ? `(${fmt(currentTicketTotal)})` : ''}
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="20 6 9 17 4 12" />
-          </svg>
         </button>
       </div>
 
@@ -206,7 +209,7 @@ export function OrderSheet({ onOpenSetup }: Props) {
                   >
                     <div className="history-item-left">
                       <span className="history-customer-name">{order.customerName}</span>
-                      <span className="history-time">{fmtTime(order.completedAt)}</span>
+                      <span className="history-time">{fmtDateTime(order.completedAt)}</span>
                     </div>
                     <div className="history-item-right">
                       <span className="history-amount">{fmt(order.totalAmount)}</span>
@@ -218,21 +221,6 @@ export function OrderSheet({ onOpenSetup }: Props) {
                 ))
               )}
             </div>
-
-            {history.length > 0 && (
-              <div className="history-modal-footer">
-                <button
-                  className="btn btn-ghost text-danger"
-                  onClick={() => {
-                    if (window.confirm('Clear all completed orders log for today?')) {
-                      dispatch({ type: 'CLEAR_HISTORY' })
-                    }
-                  }}
-                >
-                  Clear History Log
-                </button>
-              </div>
-            )}
           </div>
         </div>
       )}
@@ -243,7 +231,7 @@ export function OrderSheet({ onOpenSetup }: Props) {
           <div className="modal receipt-modal" onClick={(e) => e.stopPropagation()}>
             <div className="receipt-header">
               <h2 className="modal-title">{selectedHistoryOrder.customerName}</h2>
-              <span className="receipt-time">{fmtTime(selectedHistoryOrder.completedAt)}</span>
+              <span className="receipt-time">{fmtDateTime(selectedHistoryOrder.completedAt)}</span>
             </div>
 
             <div className="receipt-body">

@@ -75,8 +75,8 @@ export function SetupScreen({ initialColumns, initialName, onSave }: SetupScreen
           </svg>
         </div>
         <div>
-          <h1 className="setup-title">Sheet Setup</h1>
-          <p className="setup-subtitle">Set your menu variants and pricing</p>
+          <h1 className="setup-title">Settings</h1>
+          <p className="setup-subtitle">Configure your menu variants and pricing</p>
         </div>
       </div>
 
@@ -139,11 +139,7 @@ export function SetupScreen({ initialColumns, initialName, onSave }: SetupScreen
 
       <div className="setup-footer">
         <button className="setup-save-btn" onClick={handleSave}>
-          Start Recording
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <line x1="5" y1="12" x2="19" y2="12" />
-            <polyline points="12 5 19 12 12 19" />
-          </svg>
+          Save Settings
         </button>
       </div>
     </div>
