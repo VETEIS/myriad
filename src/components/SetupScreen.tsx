@@ -81,16 +81,6 @@ export function SetupScreen({ initialColumns, initialName, onSave }: SetupScreen
       </div>
 
       <div className="setup-body">
-        {/* Sheet name */}
-        <div className="setup-section">
-          <label className="setup-section-label">Sheet Name</label>
-          <input
-            className="setup-name-input"
-            value={name}
-            placeholder="e.g. Saturday Orders"
-            onChange={(e) => setName(e.target.value)}
-          />
-        </div>
 
         {/* Column cards */}
         <div className="setup-section">
