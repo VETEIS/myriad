@@ -904,7 +904,7 @@ body {
   min-height: 0; /* CRITICAL for flex child scrolling */
   display: flex;
   flex-direction: column;
-  margin: 0 14px;
+  margin: 14px 14px 0;
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   overflow-x: auto; /* Horizontal scrollbar when 3+ columns exist */
