@@ -128,61 +128,64 @@ export function OrderSheet({ onOpenSetup }: Props) {
         </div>
       </header>
 
-      {/* Column header labels */}
-      <div className="col-label-bar">
-        <div className="col-label-num" />
-        {columns.map((col) => (
-          <div className="col-label" key={col.id}>
-            <span className="col-label-name">{col.name}</span>
-            {(col.basePrice > 0 || col.pricePerCount > 0) && (
-              <span className="col-label-price">
-                {col.basePrice > 0 ? `Rice ₱${col.basePrice}` : ''}
-                {col.basePrice > 0 && col.pricePerCount > 0 ? ' · ' : ''}
-                {col.pricePerCount > 0 ? `Siomai ₱${col.pricePerCount}/pc` : ''}
-              </span>
-            )}
-          </div>
-        ))}
-        <div className="col-label-total">Total</div>
-      </div>
-
-      {/* Sheet Grid Container */}
+      {/* Sheet Grid Container (Horizontal + Vertical Scrollable) */}
       <div className="sheet-container">
-        <div className="rows-container">
-          {rows.map((row, idx) => {
-            const total = rowTotal(row.values, columns)
-            return (
-              <div key={row.id} className="grid-row data-row" style={{ gridTemplateColumns: `44px repeat(${columns.length}, 1fr) 76px` }}>
-                <div className="row-number-cell">{idx + 1}</div>
-                {columns.map((col, ci) => {
-                  const isDisabled = idx > 0 && (rows[idx - 1]?.values[ci] ?? 0) === 0
-                  return (
-                    <CountCell
-                      key={col.id}
-                      value={row.values[ci] ?? 0}
-                      disabled={isDisabled}
-                      onIncrement={() => dispatch({ type: 'INCREMENT', rowId: row.id, colIndex: ci })}
-                      onDecrement={() => dispatch({ type: 'DECREMENT', rowId: row.id, colIndex: ci })}
-                    />
-                  )
-                })}
-                <div className={`row-total-cell ${total > 0 ? 'has-total' : ''}`}>
-                  {total > 0 ? fmt(total) : '—'}
-                </div>
+        <div className="sheet-scroll-content">
+          {/* Column header labels */}
+          <div className="col-label-bar" style={{ gridTemplateColumns: `44px repeat(${columns.length}, minmax(130px, 1fr)) 76px` }}>
+            <div className="col-label-num" />
+            {columns.map((col) => (
+              <div className="col-label" key={col.id}>
+                <span className="col-label-name">{col.name}</span>
+                {(col.basePrice > 0 || col.pricePerCount > 0) && (
+                  <span className="col-label-price">
+                    {col.basePrice > 0 ? `Rice ₱${col.basePrice}` : ''}
+                    {col.basePrice > 0 && col.pricePerCount > 0 ? ' · ' : ''}
+                    {col.pricePerCount > 0 ? `Siomai ₱${col.pricePerCount}/pc` : ''}
+                  </span>
+                )}
               </div>
-            )
-          })}
-        </div>
+            ))}
+            <div className="col-label-total">Total</div>
+          </div>
 
-        {/* Current Customer Summary Row */}
-        <div className="grid-row summary-row" style={{ gridTemplateColumns: `44px repeat(${columns.length}, 1fr) 76px` }}>
-          <div className="summary-num">Σ</div>
-          {colOrderCounts.map((count, ci) => (
-            <div className="summary-col-cell" key={ci}>
-              {count > 0 ? `${count} ${count === 1 ? 'order' : 'orders'}` : '—'}
-            </div>
-          ))}
-          <div className="summary-grand">{currentTicketTotal > 0 ? fmt(currentTicketTotal) : '—'}</div>
+          {/* 50 Rows Container */}
+          <div className="rows-container">
+            {rows.map((row, idx) => {
+              const total = rowTotal(row.values, columns)
+              return (
+                <div key={row.id} className="grid-row data-row" style={{ gridTemplateColumns: `44px repeat(${columns.length}, minmax(130px, 1fr)) 76px` }}>
+                  <div className="row-number-cell">{idx + 1}</div>
+                  {columns.map((col, ci) => {
+                    const isDisabled = idx > 0 && (rows[idx - 1]?.values[ci] ?? 0) === 0
+                    return (
+                      <CountCell
+                        key={col.id}
+                        value={row.values[ci] ?? 0}
+                        disabled={isDisabled}
+                        onIncrement={() => dispatch({ type: 'INCREMENT', rowId: row.id, colIndex: ci })}
+                        onDecrement={() => dispatch({ type: 'DECREMENT', rowId: row.id, colIndex: ci })}
+                      />
+                    )
+                  })}
+                  <div className={`row-total-cell ${total > 0 ? 'has-total' : ''}`}>
+                    {total > 0 ? fmt(total) : '—'}
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+
+          {/* Current Customer Summary Row */}
+          <div className="grid-row summary-row" style={{ gridTemplateColumns: `44px repeat(${columns.length}, minmax(130px, 1fr)) 76px` }}>
+            <div className="summary-num">Σ</div>
+            {colOrderCounts.map((count, ci) => (
+              <div className="summary-col-cell" key={ci}>
+                {count > 0 ? `${count} ${count === 1 ? 'order' : 'orders'}` : '—'}
+              </div>
+            ))}
+            <div className="summary-grand">{currentTicketTotal > 0 ? fmt(currentTicketTotal) : '—'}</div>
+          </div>
         </div>
       </div>
 

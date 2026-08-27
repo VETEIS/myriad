@@ -534,8 +534,47 @@ body {
 }
 
 .setup-col-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   margin-bottom: 12px;
 }
+
+.setup-col-delete-btn {
+  padding: 3px 10px;
+  background: #fff1f2;
+  border: 1.5px solid #fecdd3;
+  border-radius: var(--radius-sm);
+  color: var(--red);
+  font-family: var(--font);
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.setup-col-delete-btn:active { transform: scale(0.95); }
+
+.add-variant-btn {
+  width: 100%;
+  padding: 13px;
+  margin-top: 12px;
+  background: #ffffff;
+  border: 2px dashed var(--accent);
+  border-radius: var(--radius-md);
+  color: var(--accent);
+  font-family: var(--font);
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.15s;
+  box-shadow: var(--shadow-sm);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.add-variant-btn:hover { background: var(--accent-soft); border-style: solid; }
+.add-variant-btn:active { transform: scale(0.98); }
 
 .setup-col-badge {
   display: inline-block;
@@ -808,10 +847,10 @@ body {
 
 /* ── Column label bar ── */
 .col-label-bar {
-  display: flex;
-  padding: 10px 14px 6px;
-  gap: 0;
-  background: var(--bg-base);
+  display: grid;
+  padding: 10px 0 6px;
+  background: #f8fafc;
+  border-bottom: 1px solid var(--border);
   flex-shrink: 0;
 }
 
@@ -859,7 +898,7 @@ body {
   align-self: center;
 }
 
-/* ── Sheet container (Fixed height, flex column) ── */
+/* ── Sheet container (Fixed height, 2D flex scroll) ── */
 .sheet-container {
   flex: 1;
   min-height: 0; /* CRITICAL for flex child scrolling */
@@ -868,9 +907,18 @@ body {
   margin: 0 14px;
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  overflow: hidden;
+  overflow-x: auto; /* Horizontal scrollbar when 3+ columns exist */
+  overflow-y: hidden;
   background: #ffffff;
   box-shadow: var(--shadow-sheet);
+  -webkit-overflow-scrolling: touch;
+}
+
+.sheet-scroll-content {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-width: max-content; /* Guarantees grid columns hold min 130px width */
 }
 
 /* Internal rows scrolling */

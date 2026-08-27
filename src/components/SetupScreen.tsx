@@ -47,6 +47,21 @@ export function SetupScreen({ initialColumns, initialName, onSave }: SetupScreen
     setCols((prev) => prev.map((c) => (c.id === id ? { ...c, [field]: value } : c)))
   }
 
+  const addVariant = () => {
+    setCols((prev) => [
+      ...prev,
+      { id: generateId(), name: `Variant ${prev.length + 1}`, basePrice: 0, pricePerCount: 0 },
+    ])
+  }
+
+  const removeVariant = (id: string) => {
+    if (cols.length <= 1) {
+      alert('You must have at least one variant.')
+      return
+    }
+    setCols((prev) => prev.filter((c) => c.id !== id))
+  }
+
   const handleSave = () => {
     const cleaned = cols.map((c) => ({
       ...c,
@@ -90,13 +105,22 @@ export function SetupScreen({ initialColumns, initialName, onSave }: SetupScreen
               <div className="setup-col-card" key={col.id}>
                 <div className="setup-col-header">
                   <span className="setup-col-badge">Variant {i + 1}</span>
+                  {cols.length > 1 && (
+                    <button
+                      className="setup-col-delete-btn"
+                      onClick={() => removeVariant(col.id)}
+                      title="Remove variant"
+                    >
+                      Delete
+                    </button>
+                  )}
                 </div>
                 <div className="setup-field">
                   <label className="setup-field-label">Variant Name</label>
                   <input
                     className="setup-text-input"
                     value={col.name}
-                    placeholder={i === 0 ? 'e.g. Spicy' : 'e.g. Regular'}
+                    placeholder={i === 0 ? 'e.g. Spicy' : i === 1 ? 'e.g. Regular' : 'e.g. Special'}
                     onChange={(e) => updateCol(col.id, 'name', e.target.value)}
                   />
                 </div>
@@ -120,6 +144,10 @@ export function SetupScreen({ initialColumns, initialName, onSave }: SetupScreen
               </div>
             ))}
           </div>
+
+          <button className="add-variant-btn" onClick={addVariant}>
+            + Add Variant
+          </button>
         </div>
 
         {/* Developer Tools */}
