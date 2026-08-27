@@ -126,26 +126,26 @@ export function SetupScreen({ initialColumns, initialName, onSave }: SetupScreen
                 </div>
                 <div className="setup-prices">
                   <PriceInput
-                    label="Rice Price (Selling)"
-                    value={col.basePrice}
-                    onChange={(v) => updateCol(col.id, 'basePrice', v)}
-                  />
-                  <PriceInput
                     label="Rice Capital (Cost)"
                     value={col.riceCost ?? 0}
                     onChange={(v) => updateCol(col.id, 'riceCost', v)}
                   />
+                  <PriceInput
+                    label="Rice Price (Selling)"
+                    value={col.basePrice}
+                    onChange={(v) => updateCol(col.id, 'basePrice', v)}
+                  />
                 </div>
                 <div className="setup-prices" style={{ marginTop: '10px' }}>
-                  <PriceInput
-                    label="Siomai Price / pc"
-                    value={col.pricePerCount}
-                    onChange={(v) => updateCol(col.id, 'pricePerCount', v)}
-                  />
                   <PriceInput
                     label="Siomai Capital / pc"
                     value={col.siomaiCostPerPc ?? 0}
                     onChange={(v) => updateCol(col.id, 'siomaiCostPerPc', v)}
+                  />
+                  <PriceInput
+                    label="Siomai Price / pc"
+                    value={col.pricePerCount}
+                    onChange={(v) => updateCol(col.id, 'pricePerCount', v)}
                   />
                 </div>
                 <p className="setup-formula-hint">
