@@ -701,6 +701,12 @@ body {
   text-overflow: ellipsis;
 }
 
+.editable-label.is-placeholder {
+  color: var(--text-muted) !important;
+  font-weight: 600 !important;
+  font-style: italic;
+}
+
 .sheet-date-subtitle {
   font-size: 10px;
   font-weight: 600;

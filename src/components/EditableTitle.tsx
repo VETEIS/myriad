@@ -27,9 +27,9 @@ export function EditableTitle({ value, onChange, placeholder = 'Untitled', class
 
   const commit = useCallback(() => {
     const trimmed = draft.trim()
-    onChange(trimmed || placeholder)
+    onChange(trimmed)
     setEditing(false)
-  }, [draft, onChange, placeholder])
+  }, [draft, onChange])
 
   const cancel = () => {
     setDraft(value)
@@ -55,9 +55,9 @@ export function EditableTitle({ value, onChange, placeholder = 'Untitled', class
 
   return (
     <span
-      className={`editable-label ${className}`}
+      className={`editable-label ${!value ? 'is-placeholder' : ''} ${className}`}
       onClick={startEdit}
-      title="Tap to rename"
+      title="Tap to enter name"
     >
       {value || placeholder}
     </span>
