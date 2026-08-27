@@ -66,27 +66,28 @@ export function OrderSheet() {
         </div>
       </header>
 
+      {/* Column Titles Control Bar (above table grid) */}
+      <div className="column-headers-bar">
+        <div className="header-col-box">
+          <span className="col-tag">COL A</span>
+          <EditableTitle
+            value={state.columns[0]}
+            onChange={(v) => dispatch({ type: 'SET_COLUMN_TITLE', col: 0, value: v })}
+            placeholder="Column A"
+          />
+        </div>
+        <div className="header-col-box">
+          <span className="col-tag">COL B</span>
+          <EditableTitle
+            value={state.columns[1]}
+            onChange={(v) => dispatch({ type: 'SET_COLUMN_TITLE', col: 1, value: v })}
+            placeholder="Column B"
+          />
+        </div>
+      </div>
+
       {/* Sheet grid */}
       <div className="sheet-container">
-        {/* Column title row */}
-        <div className="grid-row title-row">
-          <div className="row-number-header" aria-hidden="true">#</div>
-          <div className="title-cell">
-            <EditableTitle
-              value={state.columns[0]}
-              onChange={(v) => dispatch({ type: 'SET_COLUMN_TITLE', col: 0, value: v })}
-              placeholder="Column A"
-            />
-          </div>
-          <div className="title-cell">
-            <EditableTitle
-              value={state.columns[1]}
-              onChange={(v) => dispatch({ type: 'SET_COLUMN_TITLE', col: 1, value: v })}
-              placeholder="Column B"
-            />
-          </div>
-        </div>
-
         {/* Data rows */}
         <div className="rows-container">
           {state.rows.map((row, idx) => (
