@@ -1,29 +1,47 @@
 export interface ColumnConfig {
   id: string
   name: string
-  basePrice: number      // fixed amount when count > 0
-  pricePerCount: number  // added for each count tap
+  basePrice: number      // rice price
+  pricePerCount: number  // siomai per pc price
 }
 
 export interface CellRow {
   id: string
-  values: number[] // one per column, index-matched
+  values: number[] // count of siomai per column
+}
+
+export interface CompletedOrderItem {
+  colName: string
+  count: number
+  subtotal: number
+}
+
+export interface CompletedOrder {
+  id: string
+  customerName: string
+  columns: ColumnConfig[]
+  rows: CellRow[]
+  totalAmount: number
+  completedAt: number
 }
 
 export interface SheetState {
   id: string
-  name: string
+  customerName: string
   columns: ColumnConfig[]
   rows: CellRow[]
+  history: CompletedOrder[]
   createdAt: number
   updatedAt: number
 }
 
 export type SheetAction =
-  | { type: 'APPLY_SETUP'; columns: ColumnConfig[]; name: string }
-  | { type: 'RENAME_SHEET'; name: string }
+  | { type: 'APPLY_SETUP'; columns: ColumnConfig[]; customerName: string }
+  | { type: 'SET_CUSTOMER_NAME'; customerName: string }
   | { type: 'INCREMENT'; rowId: string; colIndex: number }
   | { type: 'DECREMENT'; rowId: string; colIndex: number }
   | { type: 'ADD_ROW' }
-  | { type: 'RESET_ALL' }
+  | { type: 'COMPLETE_ORDER' }
+  | { type: 'DELETE_HISTORY_ITEM'; orderId: string }
+  | { type: 'CLEAR_HISTORY' }
   | { type: 'LOAD'; state: SheetState }

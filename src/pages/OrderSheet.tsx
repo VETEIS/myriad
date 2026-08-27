@@ -1,11 +1,14 @@
 import { useReducer, useEffect, useCallback, useState } from 'react'
 import { sheetReducer } from '../reducer'
-import { loadFromStorage, saveToStorage, createDefaultSheet, cellTotal, rowTotal, getTodayDateString } from '../storage'
+import { loadFromStorage, saveToStorage, createDefaultSheet, cellTotal, rowTotal } from '../storage'
 import { CountCell } from '../components/CountCell'
+import { EditableTitle } from '../components/EditableTitle'
+import { CompletedOrder } from '../types'
 
 const SAVE_DEBOUNCE_MS = 600
-
 const fmt = (n: number) => `₱${n.toLocaleString()}`
+const fmtTime = (ts: number) =>
+  new Date(ts).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
 
 interface Props {
   onOpenSetup: () => void
@@ -16,7 +19,8 @@ export function OrderSheet({ onOpenSetup }: Props) {
     return loadFromStorage() ?? createDefaultSheet()
   })
 
-  const [showReset, setShowReset] = useState(false)
+  const [showHistoryModal, setShowHistoryModal] = useState(false)
+  const [selectedHistoryOrder, setSelectedHistoryOrder] = useState<CompletedOrder | null>(null)
 
   useEffect(() => {
     const t = setTimeout(() => saveToStorage(state), SAVE_DEBOUNCE_MS)
@@ -25,23 +29,24 @@ export function OrderSheet({ onOpenSetup }: Props) {
 
   const addRow = useCallback(() => dispatch({ type: 'ADD_ROW' }), [])
 
-  const handleReset = () => {
-    dispatch({ type: 'RESET_ALL' })
-    dispatch({ type: 'RENAME_SHEET', name: getTodayDateString() })
-    setShowReset(false)
+  const handleCompleteOrder = () => {
+    dispatch({ type: 'COMPLETE_ORDER' })
   }
 
-  const { columns, rows } = state
+  const { columns, rows, history, customerName } = state
 
-  // Grand total per column and overall
+  // Total amount for CURRENT customer ticket
   const colTotals = columns.map((col, ci) =>
     rows.reduce((sum, row) => sum + cellTotal(row.values[ci] ?? 0, col), 0),
   )
-  const grandTotal = colTotals.reduce((a, b) => a + b, 0)
+  const currentTicketTotal = colTotals.reduce((a, b) => a + b, 0)
+
+  // Overall today's total revenue across all settled orders
+  const todayTotalRevenue = history.reduce((sum, item) => sum + item.totalAmount, 0)
 
   return (
     <div className="sheet-wrapper">
-      {/* Header */}
+      {/* App Header */}
       <header className="app-header">
         <div className="header-left">
           <div className="app-logo">
@@ -53,21 +58,38 @@ export function OrderSheet({ onOpenSetup }: Props) {
             </svg>
           </div>
           <div className="header-title-block">
-            <span className="sheet-name">{state.name}</span>
-            <span className="sheet-total-badge">{fmt(grandTotal)}</span>
+            <EditableTitle
+              value={customerName}
+              onChange={(name) => dispatch({ type: 'SET_CUSTOMER_NAME', customerName: name })}
+              placeholder="Customer Name"
+              className="sheet-name"
+            />
+            {currentTicketTotal > 0 && (
+              <span className="sheet-total-badge">{fmt(currentTicketTotal)}</span>
+            )}
           </div>
         </div>
+
         <div className="header-actions">
-          <button className="btn-icon" onClick={onOpenSetup} aria-label="Settings" title="Settings">
+          {/* History log drawer button */}
+          <button
+            className="btn-icon btn-history"
+            onClick={() => setShowHistoryModal(true)}
+            title="History Log"
+            aria-label="History Log"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 8v4l3 3" />
+              <circle cx="12" cy="12" r="9" />
+            </svg>
+            {history.length > 0 && <span className="history-badge">{history.length}</span>}
+          </button>
+
+          {/* Settings / Menu Manager */}
+          <button className="btn-icon" onClick={onOpenSetup} aria-label="Menu & Pricing Setup" title="Menu & Pricing Setup">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="12" cy="12" r="3" />
               <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
-            </svg>
-          </button>
-          <button className="btn-icon btn-danger" onClick={() => setShowReset(true)} aria-label="Reset all counts">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
-              <path d="M3 3v5h5" />
             </svg>
           </button>
         </div>
@@ -91,7 +113,7 @@ export function OrderSheet({ onOpenSetup }: Props) {
         <div className="col-label-total">Total</div>
       </div>
 
-      {/* Sheet grid */}
+      {/* Sheet Grid Container */}
       <div className="sheet-container">
         <div className="rows-container">
           {rows.map((row, idx) => {
@@ -99,14 +121,18 @@ export function OrderSheet({ onOpenSetup }: Props) {
             return (
               <div key={row.id} className="grid-row data-row" style={{ gridTemplateColumns: `44px repeat(${columns.length}, 1fr) 76px` }}>
                 <div className="row-number-cell">{idx + 1}</div>
-                {columns.map((col, ci) => (
-                  <CountCell
-                    key={col.id}
-                    value={row.values[ci] ?? 0}
-                    onIncrement={() => dispatch({ type: 'INCREMENT', rowId: row.id, colIndex: ci })}
-                    onDecrement={() => dispatch({ type: 'DECREMENT', rowId: row.id, colIndex: ci })}
-                  />
-                ))}
+                {columns.map((col, ci) => {
+                  const isDisabled = idx > 0 && (rows[idx - 1]?.values[ci] ?? 0) === 0
+                  return (
+                    <CountCell
+                      key={col.id}
+                      value={row.values[ci] ?? 0}
+                      disabled={isDisabled}
+                      onIncrement={() => dispatch({ type: 'INCREMENT', rowId: row.id, colIndex: ci })}
+                      onDecrement={() => dispatch({ type: 'DECREMENT', rowId: row.id, colIndex: ci })}
+                    />
+                  )
+                })}
                 <div className={`row-total-cell ${total > 0 ? 'has-total' : ''}`}>
                   {total > 0 ? fmt(total) : '—'}
                 </div>
@@ -115,7 +141,7 @@ export function OrderSheet({ onOpenSetup }: Props) {
           })}
         </div>
 
-        {/* Summary row */}
+        {/* Current Customer Summary Row */}
         <div className="grid-row summary-row" style={{ gridTemplateColumns: `44px repeat(${columns.length}, 1fr) 76px` }}>
           <div className="summary-num">Σ</div>
           {colTotals.map((total, ci) => (
@@ -123,32 +149,136 @@ export function OrderSheet({ onOpenSetup }: Props) {
               {total > 0 ? fmt(total) : '—'}
             </div>
           ))}
-          <div className="summary-grand">{grandTotal > 0 ? fmt(grandTotal) : '—'}</div>
+          <div className="summary-grand">{currentTicketTotal > 0 ? fmt(currentTicketTotal) : '—'}</div>
         </div>
       </div>
 
-      {/* Add row */}
-      <button className="add-row-btn" onClick={addRow} aria-label="Add row">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-          <line x1="12" y1="5" x2="12" y2="19" />
-          <line x1="5" y1="12" x2="19" y2="12" />
-        </svg>
-        Add Row
-      </button>
+      {/* Action Bar */}
+      <div className="sheet-action-bar">
+        <button className="complete-order-btn" onClick={handleCompleteOrder}>
+          Settle Order {currentTicketTotal > 0 ? `(${fmt(currentTicketTotal)})` : ''}
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="20 6 9 17 4 12" />
+          </svg>
+        </button>
+      </div>
 
-      <p className="hint-text">Tap = +1 siomai · Long-press = remove · Each row is one order</p>
+      <p className="hint-text">Tap = +1 siomai · Long-press = remove · Cells unlock sequentially</p>
 
-      {/* Reset modal */}
-      {showReset && (
-        <div className="modal-overlay" onClick={() => setShowReset(false)}>
-          <div className="modal" onClick={(e) => e.stopPropagation()}>
-            <h2 className="modal-title">Start New Day?</h2>
-            <p className="modal-body">
-              This resets all row counts to 0 and updates the date. Your menu variants and prices stay saved.
-            </p>
+      {/* HISTORY MODAL */}
+      {showHistoryModal && (
+        <div className="modal-overlay" onClick={() => setShowHistoryModal(false)}>
+          <div className="modal history-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="history-modal-header">
+              <div>
+                <h2 className="modal-title">Completed Orders</h2>
+                <p className="history-revenue-subtitle">
+                  Total Sales: <strong className="revenue-highlight">{fmt(todayTotalRevenue)}</strong> ({history.length} settled orders)
+                </p>
+              </div>
+              <button className="modal-close-btn" onClick={() => setShowHistoryModal(false)}>✕</button>
+            </div>
+
+            <div className="history-list">
+              {history.length === 0 ? (
+                <div className="history-empty">
+                  <p>No settled orders yet today.</p>
+                  <span className="history-empty-hint">Settle customer orders to log them here.</span>
+                </div>
+              ) : (
+                history.map((order) => (
+                  <div
+                    key={order.id}
+                    className="history-item-card"
+                    onClick={() => setSelectedHistoryOrder(order)}
+                  >
+                    <div className="history-item-left">
+                      <span className="history-customer-name">{order.customerName}</span>
+                      <span className="history-time">{fmtTime(order.completedAt)}</span>
+                    </div>
+                    <div className="history-item-right">
+                      <span className="history-amount">{fmt(order.totalAmount)}</span>
+                      <svg className="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <polyline points="9 18 15 12 9 6" />
+                      </svg>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+
+            {history.length > 0 && (
+              <div className="history-modal-footer">
+                <button
+                  className="btn btn-ghost text-danger"
+                  onClick={() => {
+                    if (window.confirm('Clear all completed orders log for today?')) {
+                      dispatch({ type: 'CLEAR_HISTORY' })
+                    }
+                  }}
+                >
+                  Clear History Log
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* SELECTED HISTORY ITEM RECEIPT MODAL */}
+      {selectedHistoryOrder && (
+        <div className="modal-overlay" onClick={() => setSelectedHistoryOrder(null)}>
+          <div className="modal receipt-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="receipt-header">
+              <h2 className="modal-title">{selectedHistoryOrder.customerName}</h2>
+              <span className="receipt-time">{fmtTime(selectedHistoryOrder.completedAt)}</span>
+            </div>
+
+            <div className="receipt-body">
+              <div className="receipt-table-header">
+                <span>Row</span>
+                {selectedHistoryOrder.columns.map((c) => (
+                  <span key={c.id}>{c.name}</span>
+                ))}
+                <span>Total</span>
+              </div>
+              {selectedHistoryOrder.rows.map((row, i) => {
+                const rTotal = rowTotal(row.values, selectedHistoryOrder.columns)
+                if (rTotal === 0 && row.values.every((v) => v === 0)) return null
+                return (
+                  <div key={row.id} className="receipt-row">
+                    <span className="receipt-row-num">{i + 1}</span>
+                    {selectedHistoryOrder.columns.map((col, ci) => (
+                      <span key={col.id} className="receipt-val">
+                        {row.values[ci] > 0 ? `${row.values[ci]} pcs` : '—'}
+                      </span>
+                    ))}
+                    <span className="receipt-total">{fmt(rTotal)}</span>
+                  </div>
+                )
+              })}
+            </div>
+
+            <div className="receipt-total-bar">
+              <span>Total Paid:</span>
+              <strong className="receipt-total-amount">{fmt(selectedHistoryOrder.totalAmount)}</strong>
+            </div>
+
             <div className="modal-actions">
-              <button className="btn btn-ghost" onClick={() => setShowReset(false)}>Cancel</button>
-              <button className="btn btn-reset" onClick={handleReset}>Start New Day</button>
+              <button
+                className="btn btn-ghost text-danger"
+                onClick={() => {
+                  if (window.confirm('Delete this order entry?')) {
+                    dispatch({ type: 'DELETE_HISTORY_ITEM', orderId: selectedHistoryOrder.id })
+                    setSelectedHistoryOrder(null)
+                  }
+                }}
+              >
+                Delete Entry
+              </button>
+              <button className="btn btn-ghost" onClick={() => setSelectedHistoryOrder(null)}>
+                Close
+              </button>
             </div>
           </div>
         </div>

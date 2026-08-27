@@ -1,6 +1,7 @@
-import { SheetState, ColumnConfig, CellRow } from './types'
+import { SheetState, ColumnConfig, CellRow, CompletedOrder } from './types'
 
-const STORAGE_KEY = 'myriad-order-tracker-v2'
+const STORAGE_KEY = 'myriad-order-tracker-v3'
+const MENU_PRESET_KEY = 'myriad-menu-preset-v1'
 
 export function generateId(): string {
   return Math.random().toString(36).slice(2, 10)
@@ -13,18 +14,6 @@ export function createDefaultColumn(name: string, basePrice = 0, pricePerCount =
 export function createDefaultRow(numCols: number): CellRow {
   return { id: generateId(), values: Array(numCols).fill(0) }
 }
-
-export function getTodayDateString(): string {
-  const options: Intl.DateTimeFormatOptions = {
-    weekday: 'short',
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  }
-  return new Date().toLocaleDateString('en-US', options) // e.g. "Thu, Aug 27, 2026"
-}
-
-const MENU_PRESET_KEY = 'myriad-menu-preset-v1'
 
 export function loadSavedMenuColumns(): ColumnConfig[] {
   try {
@@ -54,9 +43,10 @@ export function createDefaultSheet(): SheetState {
   const columns = loadSavedMenuColumns()
   return {
     id: generateId(),
-    name: getTodayDateString(),
+    customerName: 'Customer #1',
     columns,
-    rows: Array.from({ length: 8 }, () => createDefaultRow(columns.length)),
+    rows: Array.from({ length: 50 }, () => createDefaultRow(columns.length)),
+    history: [],
     createdAt: Date.now(),
     updatedAt: Date.now(),
   }
@@ -70,7 +60,7 @@ export function cellTotal(count: number, col: ColumnConfig): number {
 
 // Compute total for one row
 export function rowTotal(values: number[], columns: ColumnConfig[]): number {
-  return values.reduce((sum, count, i) => sum + cellTotal(count, columns[i]), 0)
+  return values.reduce((sum, count, i) => sum + cellTotal(count, columns[i] ?? { basePrice: 0, pricePerCount: 0 }), 0)
 }
 
 export function saveToStorage(state: SheetState): void {
@@ -87,6 +77,8 @@ export function loadFromStorage(): SheetState | null {
     if (!raw) return null
     const parsed = JSON.parse(raw) as SheetState
     if (!parsed.id || !Array.isArray(parsed.columns) || !Array.isArray(parsed.rows)) return null
+    if (!Array.isArray(parsed.history)) parsed.history = []
+    if (!parsed.customerName) parsed.customerName = 'Customer #1'
     return parsed
   } catch {
     return null
