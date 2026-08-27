@@ -88,7 +88,7 @@ export function loadFromStorage(): SheetState | null {
     const parsed = JSON.parse(raw) as SheetState
     if (!parsed.id || !Array.isArray(parsed.columns) || !Array.isArray(parsed.rows)) return null
     if (!Array.isArray(parsed.history)) parsed.history = []
-    if (!parsed.customerName) parsed.customerName = 'Customer #1'
+    if (!parsed.customerName) parsed.customerName = ''
     return parsed
   } catch {
     return null

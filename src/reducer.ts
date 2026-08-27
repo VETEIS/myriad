@@ -70,7 +70,7 @@ export function sheetReducer(state: SheetState, action: SheetAction): SheetState
       // Only archive if there is non-zero order data or explicit customer
       const completedRecord: CompletedOrder = {
         id: generateId(),
-        customerName: state.customerName.trim() || `Customer #${state.history.length + 1}`,
+        customerName: state.customerName.trim(),
         columns: [...state.columns],
         rows: state.rows.map((r) => ({ ...r, values: [...r.values] })),
         totalAmount: orderTotal,
