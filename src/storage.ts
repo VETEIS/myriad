@@ -24,11 +24,34 @@ export function getTodayDateString(): string {
   return new Date().toLocaleDateString('en-US', options) // e.g. "Thu, Aug 27, 2026"
 }
 
-export function createDefaultSheet(): SheetState {
-  const columns = [
-    createDefaultColumn('Spicy'),
-    createDefaultColumn('Regular'),
+const MENU_PRESET_KEY = 'myriad-menu-preset-v1'
+
+export function loadSavedMenuColumns(): ColumnConfig[] {
+  try {
+    const raw = localStorage.getItem(MENU_PRESET_KEY)
+    if (raw) {
+      const parsed = JSON.parse(raw) as ColumnConfig[]
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed
+    }
+  } catch {
+    // ignore
+  }
+  return [
+    createDefaultColumn('Spicy', 50, 5),
+    createDefaultColumn('Regular', 45, 5),
   ]
+}
+
+export function saveSavedMenuColumns(columns: ColumnConfig[]): void {
+  try {
+    localStorage.setItem(MENU_PRESET_KEY, JSON.stringify(columns))
+  } catch {
+    // ignore
+  }
+}
+
+export function createDefaultSheet(): SheetState {
+  const columns = loadSavedMenuColumns()
   return {
     id: generateId(),
     name: getTodayDateString(),

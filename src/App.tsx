@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { OrderSheet } from './pages/OrderSheet'
 import { SetupScreen } from './components/SetupScreen'
-import { loadFromStorage, saveToStorage, createDefaultSheet, getTodayDateString } from './storage'
+import { loadFromStorage, saveToStorage, createDefaultSheet, getTodayDateString, saveSavedMenuColumns } from './storage'
 import { ColumnConfig } from './types'
 
 type Screen = 'setup' | 'sheet'
@@ -11,6 +11,7 @@ export default function App() {
   const [screen, setScreen] = useState<Screen>(existing ? 'sheet' : 'setup')
 
   const handleSaveSetup = (name: string, columns: ColumnConfig[]) => {
+    saveSavedMenuColumns(columns)
     const current = loadFromStorage() ?? createDefaultSheet()
     const numCols = columns.length
     const rows = current.rows.map((row) => ({

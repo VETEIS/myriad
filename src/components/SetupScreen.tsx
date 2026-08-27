@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { ColumnConfig } from '../types'
-import { generateId, getTodayDateString } from '../storage'
+import { generateId, getTodayDateString, loadSavedMenuColumns } from '../storage'
 
 interface SetupScreenProps {
   initialColumns: ColumnConfig[]
@@ -40,12 +40,7 @@ function PriceInput({
 export function SetupScreen({ initialColumns, initialName, onSave }: SetupScreenProps) {
   const [name, setName] = useState(initialName)
   const [cols, setCols] = useState<ColumnConfig[]>(
-    initialColumns.length > 0
-      ? initialColumns
-      : [
-          { id: generateId(), name: '', basePrice: 0, pricePerCount: 0 },
-          { id: generateId(), name: '', basePrice: 0, pricePerCount: 0 },
-        ],
+    initialColumns.length > 0 ? initialColumns : loadSavedMenuColumns(),
   )
 
   const updateCol = (id: string, field: keyof Omit<ColumnConfig, 'id'>, value: string | number) => {

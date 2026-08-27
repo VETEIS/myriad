@@ -1,6 +1,6 @@
 import { useReducer, useEffect, useCallback, useState } from 'react'
 import { sheetReducer } from '../reducer'
-import { loadFromStorage, saveToStorage, createDefaultSheet, cellTotal, rowTotal } from '../storage'
+import { loadFromStorage, saveToStorage, createDefaultSheet, cellTotal, rowTotal, getTodayDateString } from '../storage'
 import { CountCell } from '../components/CountCell'
 
 const SAVE_DEBOUNCE_MS = 600
@@ -27,6 +27,7 @@ export function OrderSheet({ onOpenSetup }: Props) {
 
   const handleReset = () => {
     dispatch({ type: 'RESET_ALL' })
+    dispatch({ type: 'RENAME_SHEET', name: getTodayDateString() })
     setShowReset(false)
   }
 
@@ -141,11 +142,13 @@ export function OrderSheet({ onOpenSetup }: Props) {
       {showReset && (
         <div className="modal-overlay" onClick={() => setShowReset(false)}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>
-            <h2 className="modal-title">Reset all counts?</h2>
-            <p className="modal-body">All counts will go back to zero. Column names and prices are kept.</p>
+            <h2 className="modal-title">Start New Day?</h2>
+            <p className="modal-body">
+              This resets all row counts to 0 and updates the date. Your menu variants and prices stay saved.
+            </p>
             <div className="modal-actions">
               <button className="btn btn-ghost" onClick={() => setShowReset(false)}>Cancel</button>
-              <button className="btn btn-reset" onClick={handleReset}>Reset</button>
+              <button className="btn btn-reset" onClick={handleReset}>Start New Day</button>
             </div>
           </div>
         </div>
