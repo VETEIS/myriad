@@ -8,6 +8,9 @@ export function sheetReducer(state: SheetState, action: SheetAction): SheetState
     case 'LOAD':
       return action.state
 
+    case 'RENAME_SHEET':
+      return { ...state, name: action.name, updatedAt: now }
+
     case 'APPLY_SETUP': {
       // Update column configs; pad/trim row values to match new column count
       const newCols: ColumnConfig[] = action.columns

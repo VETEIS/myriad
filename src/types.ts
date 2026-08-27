@@ -21,6 +21,7 @@ export interface SheetState {
 
 export type SheetAction =
   | { type: 'APPLY_SETUP'; columns: ColumnConfig[]; name: string }
+  | { type: 'RENAME_SHEET'; name: string }
   | { type: 'INCREMENT'; rowId: string; colIndex: number }
   | { type: 'DECREMENT'; rowId: string; colIndex: number }
   | { type: 'ADD_ROW' }
