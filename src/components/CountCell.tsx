@@ -4,11 +4,12 @@ import { useLongPress } from '../hooks/useLongPress'
 interface CountCellProps {
   value: number
   disabled?: boolean
+  noRice?: boolean
   onIncrement: () => void
   onDecrement: () => void
 }
 
-export function CountCell({ value, disabled = false, onIncrement, onDecrement }: CountCellProps) {
+export function CountCell({ value, disabled = false, noRice = false, onIncrement, onDecrement }: CountCellProps) {
   const [flash, setFlash] = useState<'up' | 'down' | null>(null)
 
   const handleTap = () => {
@@ -27,15 +28,15 @@ export function CountCell({ value, disabled = false, onIncrement, onDecrement }:
 
   const pressHandlers = useLongPress({ onTap: handleTap, onLongPress: handleLongPress })
 
-  const siomaiPcs = value > 0 ? value - 1 : 0
+  const siomaiPcs = noRice ? value : (value > 0 ? value - 1 : 0)
 
   return (
     <div
-      className={`count-cell ${flash === 'up' ? 'flash-up' : ''} ${flash === 'down' ? 'flash-down' : ''} ${value > 0 ? 'has-value' : ''} ${disabled ? 'is-disabled' : ''}`}
+      className={`count-cell ${flash === 'up' ? 'flash-up' : ''} ${flash === 'down' ? 'flash-down' : ''} ${value > 0 ? 'has-value' : ''} ${noRice ? 'is-solo-cell' : ''} ${disabled ? 'is-disabled' : ''}`}
       {...pressHandlers}
       role="button"
       aria-disabled={disabled}
-      aria-label={`${siomaiPcs} siomai pieces.`}
+      aria-label={`${siomaiPcs} siomai pieces${noRice ? ' (no rice)' : ''}.`}
     >
       {value > 0 ? (
         <div className="count-with-unit">

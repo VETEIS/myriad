@@ -149,14 +149,25 @@ export function OrderSheet({ onOpenSetup }: Props) {
           <div className="col-label-bar" style={{ gridTemplateColumns: `44px repeat(${columns.length}, minmax(130px, 1fr)) 76px` }}>
             <div className="col-label-num" />
             {columns.map((col) => (
-              <div className="col-label" key={col.id}>
-                <span className="col-label-name">{col.name}</span>
-                {(col.basePrice > 0 || col.pricePerCount > 0) && (
-                  <span className="col-label-price">
-                    {col.basePrice > 0 ? `Rice ₱${col.basePrice}` : ''}
-                    {col.basePrice > 0 && col.pricePerCount > 0 ? ' · ' : ''}
-                    {col.pricePerCount > 0 ? `Siomai ₱${col.pricePerCount}/pc` : ''}
-                  </span>
+              <div className={`col-label ${col.noRice ? 'is-solo-col' : ''}`} key={col.id}>
+                <div className="col-label-title-row">
+                  <span className="col-label-name">{col.name}</span>
+                  {col.noRice && <span className="col-solo-badge">Solo</span>}
+                </div>
+                {col.noRice ? (
+                  col.pricePerCount > 0 && (
+                    <span className="col-label-price">
+                      Siomai ₱{col.pricePerCount}/pc
+                    </span>
+                  )
+                ) : (
+                  (col.basePrice > 0 || col.pricePerCount > 0) && (
+                    <span className="col-label-price">
+                      {col.basePrice > 0 ? `Rice ₱${col.basePrice}` : ''}
+                      {col.basePrice > 0 && col.pricePerCount > 0 ? ' · ' : ''}
+                      {col.pricePerCount > 0 ? `Siomai ₱${col.pricePerCount}/pc` : ''}
+                    </span>
+                  )
                 )}
               </div>
             ))}
@@ -177,6 +188,7 @@ export function OrderSheet({ onOpenSetup }: Props) {
                         key={col.id}
                         value={row.values[ci] ?? 0}
                         disabled={isDisabled}
+                        noRice={col.noRice}
                         onIncrement={() => dispatch({ type: 'INCREMENT', rowId: row.id, colIndex: ci })}
                         onDecrement={() => dispatch({ type: 'DECREMENT', rowId: row.id, colIndex: ci })}
                       />
@@ -324,11 +336,15 @@ export function OrderSheet({ onOpenSetup }: Props) {
                 return (
                   <div key={row.id} className="receipt-row" style={{ gridTemplateColumns: `36px repeat(${selectedHistoryOrder.columns.length}, 1fr) 70px` }}>
                     <span className="receipt-row-num">{i + 1}</span>
-                    {selectedHistoryOrder.columns.map((col, ci) => (
-                      <span key={col.id} className="receipt-val">
-                        {row.values[ci] > 0 ? `${row.values[ci] - 1} pcs` : '—'}
-                      </span>
-                    ))}
+                    {selectedHistoryOrder.columns.map((col, ci) => {
+                      const countVal = row.values[ci] ?? 0
+                      const pieceDisplay = countVal > 0 ? (col.noRice ? `${countVal} pcs` : `${countVal - 1} pcs`) : '—'
+                      return (
+                        <span key={col.id} className="receipt-val">
+                          {pieceDisplay}
+                        </span>
+                      )
+                    })}
                     <span className="receipt-total">{fmt(rTotal)}</span>
                   </div>
                 )

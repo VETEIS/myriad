@@ -5,6 +5,7 @@ export interface ColumnConfig {
   pricePerCount: number   // siomai selling price per pc
   riceCost?: number       // rice capital cost
   siomaiCostPerPc?: number // siomai capital cost per pc
+  noRice?: boolean        // true if siomai solo / no fried rice
 }
 
 export interface CellRow {

@@ -7,8 +7,8 @@ export function generateId(): string {
   return Math.random().toString(36).slice(2, 10)
 }
 
-export function createDefaultColumn(name: string, basePrice = 0, pricePerCount = 0): ColumnConfig {
-  return { id: generateId(), name, basePrice, pricePerCount }
+export function createDefaultColumn(name: string, basePrice = 0, pricePerCount = 0, noRice = false): ColumnConfig {
+  return { id: generateId(), name, basePrice, pricePerCount, noRice }
 }
 
 export function createDefaultRow(numCols: number): CellRow {
@@ -63,11 +63,18 @@ export function createDefaultSheet(): SheetState {
 }
 
 // Compute total for one cell
-// count = 0: inactive (₱0)
-// count = 1: plain fried rice with 0 siomai pcs (basePrice)
-// count >= 2: fried rice with (count - 1) siomai pcs (basePrice + (count - 1) * pricePerCount)
+// Meal mode (noRice = false / undefined):
+//   count = 0: inactive (₱0)
+//   count = 1: plain fried rice with 0 siomai pcs (basePrice)
+//   count >= 2: fried rice with (count - 1) siomai pcs (basePrice + (count - 1) * pricePerCount)
+// Solo / Siomai Only mode (noRice = true):
+//   count = 0: inactive (₱0)
+//   count >= 1: count siomai pcs (count * pricePerCount)
 export function cellTotal(count: number, col: ColumnConfig): number {
   if (count <= 0) return 0
+  if (col.noRice) {
+    return count * col.pricePerCount
+  }
   const siomaiPcs = count - 1
   return col.basePrice + siomaiPcs * col.pricePerCount
 }
@@ -75,9 +82,12 @@ export function cellTotal(count: number, col: ColumnConfig): number {
 // Compute capital cost for one cell
 export function cellCost(count: number, col: ColumnConfig): number {
   if (count <= 0) return 0
+  const siomaiCost = col.siomaiCostPerPc ?? 0
+  if (col.noRice) {
+    return count * siomaiCost
+  }
   const siomaiPcs = count - 1
   const riceCost = col.riceCost ?? 0
-  const siomaiCost = col.siomaiCostPerPc ?? 0
   return riceCost + siomaiPcs * siomaiCost
 }
 

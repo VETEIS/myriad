@@ -43,14 +43,14 @@ export function SetupScreen({ initialColumns, initialName, onSave }: SetupScreen
     initialColumns.length > 0 ? initialColumns : loadSavedMenuColumns(),
   )
 
-  const updateCol = (id: string, field: keyof Omit<ColumnConfig, 'id'>, value: string | number) => {
+  const updateCol = (id: string, field: keyof Omit<ColumnConfig, 'id'>, value: string | number | boolean) => {
     setCols((prev) => prev.map((c) => (c.id === id ? { ...c, [field]: value } : c)))
   }
 
   const addVariant = () => {
     setCols((prev) => [
       ...prev,
-      { id: generateId(), name: `Variant ${prev.length + 1}`, basePrice: 0, pricePerCount: 0 },
+      { id: generateId(), name: `Variant ${prev.length + 1}`, basePrice: 0, pricePerCount: 0, noRice: false },
     ])
   }
 
@@ -66,6 +66,8 @@ export function SetupScreen({ initialColumns, initialName, onSave }: SetupScreen
     const cleaned = cols.map((c) => ({
       ...c,
       name: c.name.trim() || 'Untitled',
+      basePrice: c.noRice ? 0 : c.basePrice,
+      riceCost: c.noRice ? 0 : (c.riceCost ?? 0),
     }))
     onSave(name.trim(), cleaned)
   }
@@ -115,28 +117,51 @@ export function SetupScreen({ initialColumns, initialName, onSave }: SetupScreen
                     </button>
                   )}
                 </div>
+
+                {/* Meal vs Solo Type Toggle */}
+                <div className="setup-type-toggle">
+                  <button
+                    type="button"
+                    className={`setup-type-btn ${!col.noRice ? 'active' : ''}`}
+                    onClick={() => updateCol(col.id, 'noRice', false)}
+                  >
+                    🍚 With Rice (Meal)
+                  </button>
+                  <button
+                    type="button"
+                    className={`setup-type-btn ${col.noRice ? 'active' : ''}`}
+                    onClick={() => updateCol(col.id, 'noRice', true)}
+                  >
+                    🥢 Siomai Only (Solo)
+                  </button>
+                </div>
+
                 <div className="setup-field">
                   <label className="setup-field-label">Variant Name</label>
                   <input
                     className="setup-text-input"
                     value={col.name}
-                    placeholder={i === 0 ? 'e.g. Spicy' : i === 1 ? 'e.g. Regular' : 'e.g. Special'}
+                    placeholder={i === 0 ? 'e.g. Spicy' : i === 1 ? 'e.g. Regular' : col.noRice ? 'e.g. Solo Siomai' : 'e.g. Special'}
                     onChange={(e) => updateCol(col.id, 'name', e.target.value)}
                   />
                 </div>
-                <div className="setup-prices">
-                  <PriceInput
-                    label="Rice Capital"
-                    value={col.riceCost ?? 0}
-                    onChange={(v) => updateCol(col.id, 'riceCost', v)}
-                  />
-                  <PriceInput
-                    label="Rice Price"
-                    value={col.basePrice}
-                    onChange={(v) => updateCol(col.id, 'basePrice', v)}
-                  />
-                </div>
-                <div className="setup-prices" style={{ marginTop: '10px' }}>
+
+                {!col.noRice && (
+                  <div className="setup-prices">
+                    <PriceInput
+                      label="Rice Capital"
+                      value={col.riceCost ?? 0}
+                      onChange={(v) => updateCol(col.id, 'riceCost', v)}
+                    />
+                    <PriceInput
+                      label="Rice Price"
+                      value={col.basePrice}
+                      onChange={(v) => updateCol(col.id, 'basePrice', v)}
+                    />
+                  </div>
+                )}
+
+                <div className="setup-prices" style={{ marginTop: !col.noRice ? '10px' : '0' }}>
                   <PriceInput
                     label="Siomai Capital / pc"
                     value={col.siomaiCostPerPc ?? 0}
@@ -148,10 +173,15 @@ export function SetupScreen({ initialColumns, initialName, onSave }: SetupScreen
                     onChange={(v) => updateCol(col.id, 'pricePerCount', v)}
                   />
                 </div>
+
                 <p className="setup-formula-hint">
-                  {col.basePrice > 0 || col.pricePerCount > 0
-                    ? `e.g. 3 pcs siomai = ₱${col.basePrice + 3 * col.pricePerCount} sale (Profit: +₱${(col.basePrice + 3 * col.pricePerCount) - ((col.riceCost ?? 0) + 3 * (col.siomaiCostPerPc ?? 0))})`
-                    : 'Set prices & costs above to preview profit'}
+                  {col.noRice
+                    ? col.pricePerCount > 0
+                      ? `e.g. 4 pcs = ₱${4 * col.pricePerCount} sale (Profit: +₱${4 * (col.pricePerCount - (col.siomaiCostPerPc ?? 0))})`
+                      : 'Set siomai price & cost above to preview profit'
+                    : col.basePrice > 0 || col.pricePerCount > 0
+                      ? `e.g. 3 pcs + rice = ₱${col.basePrice + 3 * col.pricePerCount} sale (Profit: +₱${(col.basePrice + 3 * col.pricePerCount) - ((col.riceCost ?? 0) + 3 * (col.siomaiCostPerPc ?? 0))})`
+                      : 'Set prices & costs above to preview profit'}
                 </p>
               </div>
             ))}
