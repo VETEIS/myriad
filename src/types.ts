@@ -1,3 +1,5 @@
+export type OrderMode = 'combo' | 'solo'
+
 export interface ColumnConfig {
   id: string
   name: string
@@ -5,7 +7,6 @@ export interface ColumnConfig {
   pricePerCount: number   // siomai selling price per pc
   riceCost?: number       // rice capital cost
   siomaiCostPerPc?: number // siomai capital cost per pc
-  noRice?: boolean        // true if siomai solo / no fried rice
 }
 
 export interface CellRow {
@@ -26,12 +27,14 @@ export interface CompletedOrder {
   rows: CellRow[]
   totalAmount: number
   totalCost?: number      // total capital cost for this order
+  orderMode?: OrderMode   // 'combo' or 'solo'
   completedAt: number
 }
 
 export interface SheetState {
   id: string
   customerName: string
+  orderMode?: OrderMode   // 'combo' (default) or 'solo'
   columns: ColumnConfig[]
   rows: CellRow[]
   history: CompletedOrder[]
@@ -42,6 +45,8 @@ export interface SheetState {
 export type SheetAction =
   | { type: 'APPLY_SETUP'; columns: ColumnConfig[]; customerName: string }
   | { type: 'SET_CUSTOMER_NAME'; customerName: string }
+  | { type: 'SET_ORDER_MODE'; mode: OrderMode }
+  | { type: 'TOGGLE_ORDER_MODE' }
   | { type: 'INCREMENT'; rowId: string; colIndex: number }
   | { type: 'DECREMENT'; rowId: string; colIndex: number }
   | { type: 'ADD_ROW' }

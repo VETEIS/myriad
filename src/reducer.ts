@@ -11,6 +11,14 @@ export function sheetReducer(state: SheetState, action: SheetAction): SheetState
     case 'SET_CUSTOMER_NAME':
       return { ...state, customerName: action.customerName, updatedAt: now }
 
+    case 'SET_ORDER_MODE':
+      return { ...state, orderMode: action.mode, updatedAt: now }
+
+    case 'TOGGLE_ORDER_MODE': {
+      const nextMode = state.orderMode === 'solo' ? 'combo' : 'solo'
+      return { ...state, orderMode: nextMode, updatedAt: now }
+    }
+
     case 'APPLY_SETUP': {
       const newCols: ColumnConfig[] = action.columns
       const numCols = newCols.length
@@ -61,14 +69,16 @@ export function sheetReducer(state: SheetState, action: SheetAction): SheetState
     }
 
     case 'COMPLETE_ORDER': {
+      const currentMode = state.orderMode ?? 'combo'
+
       // Calculate order total
       const orderTotal = state.rows.reduce(
-        (sum, row) => sum + rowTotal(row.values, state.columns),
+        (sum, row) => sum + rowTotal(row.values, state.columns, currentMode),
         0,
       )
 
       const orderCost = state.rows.reduce(
-        (sum, row) => sum + rowCost(row.values, state.columns),
+        (sum, row) => sum + rowCost(row.values, state.columns, currentMode),
         0,
       )
 
@@ -80,10 +90,10 @@ export function sheetReducer(state: SheetState, action: SheetAction): SheetState
         rows: state.rows.map((r) => ({ ...r, values: [...r.values] })),
         totalAmount: orderTotal,
         totalCost: orderCost,
+        orderMode: currentMode,
         completedAt: now,
       }
 
-      const nextCustomerIndex = state.history.length + 2
       const freshRows = Array.from({ length: 50 }, () => createDefaultRow(state.columns.length))
 
       return {

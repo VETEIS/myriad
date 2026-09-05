@@ -360,6 +360,125 @@
 }
 
 
+/* ── Notice Banner ── */
+.setup-notice-banner {
+  background: #f0fdf4;
+  border: 1.5px solid #86efac;
+  color: #166534;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 10px 14px;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  animation: fadeIn 0.2s ease;
+}
+
+/* ── Backup & Presets section ── */
+.backup-section { margin-top: 4px; }
+
+.backup-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: #ffffff;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  box-shadow: var(--shadow-sm);
+}
+
+.backup-card-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.backup-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.backup-desc {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.backup-btn-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.btn-backup {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  padding: 8px 14px;
+  border-radius: var(--radius-sm);
+  font-family: var(--font);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.btn-backup.export-btn {
+  background: #f0fdf4;
+  color: #15803d;
+  border: 1.5px solid #bbf7d0;
+}
+
+.btn-backup.export-btn:hover {
+  background: #dcfce7;
+}
+
+.btn-backup.export-btn:active {
+  transform: scale(0.95);
+}
+
+.btn-backup.import-btn {
+  background: #f8fafc;
+  color: var(--text-primary);
+  border: 1.5px solid var(--border-strong);
+}
+
+.btn-backup.import-btn:hover {
+  background: #f1f5f9;
+}
+
+.btn-backup.import-btn:active {
+  transform: scale(0.95);
+}
+
+.btn-backup-ghost {
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  font-family: var(--font);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  background: transparent;
+  color: var(--text-secondary);
+  border: 1.5px solid var(--border);
+  transition: all 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.btn-backup-ghost:hover {
+  background: #f8fafc;
+  color: var(--text-primary);
+}
+
+.btn-backup-ghost:active {
+  transform: scale(0.95);
+}
+
 /* ── Dev section ── */
 .dev-section { margin-top: 4px; }
 
@@ -893,7 +1012,105 @@ body {
   flex-shrink: 0;
 }
 
-.header-actions { display: flex; gap: 8px; }
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.mode-badge-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 100px;
+  font-family: var(--font);
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+
+.mode-badge-btn.is-combo {
+  background: #f0fdf4;
+  color: #15803d;
+  border: 1.5px solid #bbf7d0;
+}
+
+.mode-badge-btn.is-combo:active {
+  transform: scale(0.94);
+  background: #dcfce7;
+}
+
+.mode-badge-btn.is-solo {
+  background: #fef3c7;
+  color: #b45309;
+  border: 1.5px solid #fde68a;
+}
+
+.mode-badge-btn.is-solo:active {
+  transform: scale(0.94);
+  background: #fde68a;
+}
+
+.mode-btn-icon {
+  font-size: 13px;
+  line-height: 1;
+}
+
+.mode-btn-text {
+  letter-spacing: -0.01em;
+}
+
+.history-customer-title-line {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.history-order-mode-badge {
+  font-size: 10px;
+  font-weight: 800;
+  padding: 1px 6px;
+  border-radius: 100px;
+  letter-spacing: 0.02em;
+}
+
+.history-order-mode-badge.is-combo {
+  background: #f0fdf4;
+  color: #15803d;
+  border: 1px solid #bbf7d0;
+}
+
+.history-order-mode-badge.is-solo {
+  background: #fef3c7;
+  color: #b45309;
+  border: 1px solid #fde68a;
+}
+
+.receipt-mode-pill {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 100px;
+  margin-top: 4px;
+}
+
+.receipt-mode-pill.is-combo {
+  background: #f0fdf4;
+  color: #15803d;
+  border: 1px solid #bbf7d0;
+}
+
+.receipt-mode-pill.is-solo {
+  background: #fef3c7;
+  color: #b45309;
+  border: 1px solid #fde68a;
+}
 
 .btn-icon {
   width: 36px;

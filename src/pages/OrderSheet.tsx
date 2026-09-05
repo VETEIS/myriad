@@ -52,7 +52,8 @@ export function OrderSheet({ onOpenSetup }: Props) {
     dispatch({ type: 'COMPLETE_ORDER' })
   }
 
-  const { columns, rows, history, customerName } = state
+  const { columns, rows, history, customerName, orderMode = 'combo' } = state
+  const isSolo = orderMode === 'solo'
   const isNameEmpty = !customerName.trim()
 
   // Extract unique formatted date strings from history for accounting filter
@@ -73,7 +74,7 @@ export function OrderSheet({ onOpenSetup }: Props) {
   const filteredTotalRevenue = filteredHistory.reduce((sum, item) => sum + item.totalAmount, 0)
   const filteredTotalCost = filteredHistory.reduce((sum, item) => {
     if (item.totalCost !== undefined) return sum + item.totalCost
-    return sum + item.rows.reduce((rSum, r) => rSum + rowCost(r.values, item.columns), 0)
+    return sum + item.rows.reduce((rSum, r) => rSum + rowCost(r.values, item.columns, item.orderMode ?? 'combo'), 0)
   }, 0)
   const filteredNetProfit = filteredTotalRevenue - filteredTotalCost
 
@@ -84,7 +85,7 @@ export function OrderSheet({ onOpenSetup }: Props) {
 
   // Total amount for CURRENT customer ticket
   const colTotals = columns.map((col, ci) =>
-    rows.reduce((sum, row) => sum + cellTotal(row.values[ci] ?? 0, col), 0),
+    rows.reduce((sum, row) => sum + cellTotal(row.values[ci] ?? 0, col, orderMode), 0),
   )
   const currentTicketTotal = colTotals.reduce((a, b) => a + b, 0)
 
@@ -118,6 +119,18 @@ export function OrderSheet({ onOpenSetup }: Props) {
         </div>
 
         <div className="header-actions">
+          {/* Header Mode Toggle Button (Combo Meal vs Solo Siomai) */}
+          <button
+            className={`mode-badge-btn ${isSolo ? 'is-solo' : 'is-combo'}`}
+            onClick={() => dispatch({ type: 'TOGGLE_ORDER_MODE' })}
+            type="button"
+            title={`Currently in ${isSolo ? 'Solo Siomai (No Rice)' : 'Combo Meal (With Rice)'} mode. Tap to switch.`}
+            aria-label={`Switch order mode. Current: ${isSolo ? 'Solo' : 'Combo'}`}
+          >
+            <span className="mode-btn-icon">{isSolo ? '🥢' : '🍚'}</span>
+            <span className="mode-btn-text">{isSolo ? 'Solo' : 'Combo'}</span>
+          </button>
+
           {/* History log drawer button */}
           <button
             className="btn-icon btn-history"
@@ -149,15 +162,12 @@ export function OrderSheet({ onOpenSetup }: Props) {
           <div className="col-label-bar" style={{ gridTemplateColumns: `44px repeat(${columns.length}, minmax(130px, 1fr)) 76px` }}>
             <div className="col-label-num" />
             {columns.map((col) => (
-              <div className={`col-label ${col.noRice ? 'is-solo-col' : ''}`} key={col.id}>
-                <div className="col-label-title-row">
-                  <span className="col-label-name">{col.name}</span>
-                  {col.noRice && <span className="col-solo-badge">Solo</span>}
-                </div>
-                {col.noRice ? (
+              <div className={`col-label ${isSolo ? 'is-solo-col' : ''}`} key={col.id}>
+                <span className="col-label-name">{col.name}</span>
+                {isSolo ? (
                   col.pricePerCount > 0 && (
                     <span className="col-label-price">
-                      Siomai ₱{col.pricePerCount}/pc
+                      Solo ₱{col.pricePerCount}/pc
                     </span>
                   )
                 ) : (
@@ -177,7 +187,7 @@ export function OrderSheet({ onOpenSetup }: Props) {
           {/* 50 Rows Container */}
           <div className="rows-container" ref={rowsContainerRef}>
             {rows.map((row, idx) => {
-              const total = rowTotal(row.values, columns)
+              const total = rowTotal(row.values, columns, orderMode)
               return (
                 <div key={row.id} className="grid-row data-row" style={{ gridTemplateColumns: `44px repeat(${columns.length}, minmax(130px, 1fr)) 76px` }}>
                   <div className="row-number-cell">{idx + 1}</div>
@@ -188,7 +198,7 @@ export function OrderSheet({ onOpenSetup }: Props) {
                         key={col.id}
                         value={row.values[ci] ?? 0}
                         disabled={isDisabled}
-                        noRice={col.noRice}
+                        noRice={isSolo}
                         onIncrement={() => dispatch({ type: 'INCREMENT', rowId: row.id, colIndex: ci })}
                         onDecrement={() => dispatch({ type: 'DECREMENT', rowId: row.id, colIndex: ci })}
                       />
@@ -292,7 +302,12 @@ export function OrderSheet({ onOpenSetup }: Props) {
                         onClick={() => setSelectedHistoryOrder(order)}
                       >
                         <div className="history-item-left">
-                          <span className="history-customer-name">{order.customerName}</span>
+                          <div className="history-customer-title-line">
+                            <span className="history-customer-name">{order.customerName}</span>
+                            <span className={`history-order-mode-badge ${order.orderMode === 'solo' ? 'is-solo' : 'is-combo'}`}>
+                              {order.orderMode === 'solo' ? '🥢 Solo' : '🍚 Combo'}
+                            </span>
+                          </div>
                           <span className="history-time">{fmtDateTime(order.completedAt)}</span>
                         </div>
                         <div className="history-item-right">
@@ -318,7 +333,12 @@ export function OrderSheet({ onOpenSetup }: Props) {
         <div className="modal-overlay" onClick={() => setSelectedHistoryOrder(null)}>
           <div className="modal receipt-modal" onClick={(e) => e.stopPropagation()}>
             <div className="receipt-header">
-              <h2 className="modal-title">{selectedHistoryOrder.customerName}</h2>
+              <div>
+                <h2 className="modal-title">{selectedHistoryOrder.customerName}</h2>
+                <span className={`receipt-mode-pill ${selectedHistoryOrder.orderMode === 'solo' ? 'is-solo' : 'is-combo'}`}>
+                  {selectedHistoryOrder.orderMode === 'solo' ? '🥢 Solo Siomai (No Rice)' : '🍚 Combo Meal (With Rice)'}
+                </span>
+              </div>
               <span className="receipt-time">{fmtDateTime(selectedHistoryOrder.completedAt)}</span>
             </div>
 
@@ -331,14 +351,15 @@ export function OrderSheet({ onOpenSetup }: Props) {
                 <span className="receipt-col-total">Total</span>
               </div>
               {selectedHistoryOrder.rows.map((row, i) => {
-                const rTotal = rowTotal(row.values, selectedHistoryOrder.columns)
+                const isReceiptSolo = selectedHistoryOrder.orderMode === 'solo'
+                const rTotal = rowTotal(row.values, selectedHistoryOrder.columns, selectedHistoryOrder.orderMode ?? 'combo')
                 if (rTotal === 0 && row.values.every((v) => v === 0)) return null
                 return (
                   <div key={row.id} className="receipt-row" style={{ gridTemplateColumns: `36px repeat(${selectedHistoryOrder.columns.length}, 1fr) 70px` }}>
                     <span className="receipt-row-num">{i + 1}</span>
                     {selectedHistoryOrder.columns.map((col, ci) => {
                       const countVal = row.values[ci] ?? 0
-                      const pieceDisplay = countVal > 0 ? (col.noRice ? `${countVal} pcs` : `${countVal - 1} pcs`) : '—'
+                      const pieceDisplay = countVal > 0 ? (isReceiptSolo ? `${countVal} pcs` : `${countVal - 1} pcs`) : '—'
                       return (
                         <span key={col.id} className="receipt-val">
                           {pieceDisplay}
@@ -358,11 +379,11 @@ export function OrderSheet({ onOpenSetup }: Props) {
               </div>
               <div className="receipt-calc-line">
                 <span>Capital Cost:</span>
-                <span className="text-muted-cost">-{fmt(selectedHistoryOrder.totalCost ?? selectedHistoryOrder.rows.reduce((s, r) => s + rowCost(r.values, selectedHistoryOrder.columns), 0))}</span>
+                <span className="text-muted-cost">-{fmt(selectedHistoryOrder.totalCost ?? selectedHistoryOrder.rows.reduce((s, r) => s + rowCost(r.values, selectedHistoryOrder.columns, selectedHistoryOrder.orderMode ?? 'combo'), 0))}</span>
               </div>
               <div className="receipt-calc-line profit-line">
                 <span>Net Profit:</span>
-                <strong className="receipt-profit-amount">+{fmt(selectedHistoryOrder.totalAmount - (selectedHistoryOrder.totalCost ?? selectedHistoryOrder.rows.reduce((s, r) => s + rowCost(r.values, selectedHistoryOrder.columns), 0)))}</strong>
+                <strong className="receipt-profit-amount">+{fmt(selectedHistoryOrder.totalAmount - (selectedHistoryOrder.totalCost ?? selectedHistoryOrder.rows.reduce((s, r) => s + rowCost(r.values, selectedHistoryOrder.columns, selectedHistoryOrder.orderMode ?? 'combo'), 0)))}</strong>
               </div>
             </div>
 
